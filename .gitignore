@@ -14,6 +14,11 @@ audio_split/*
 metadata/*
 !metadata/.gitkeep
 
+# Ignore log files and directories
+logs/*
+!logs/.gitkeep
+*.log
+
 # Python specific
 __pycache__/
 *.py[cod]
