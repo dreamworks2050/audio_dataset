@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 from download.downloader import get_youtube_metadata, download_video, download_audio
 import os
+from split.split import get_audio_files, split_audio
 
 # Save metadata to a file
 def save_metadata(metadata):
@@ -121,37 +122,104 @@ def grab_metadata(url):
     except Exception as e:
         return f"Error: {str(e)}", ""
 
-
-
 # Build Gradio interface
 with gr.Blocks() as ui:
-    with gr.Row():
-        with gr.Column(scale=2):
-            url_input = gr.Textbox(label="YouTube URL", placeholder="Paste YouTube URL here")
-            metadata_display = gr.Textbox(label="Metadata Summary", lines=10, interactive=False)
-            format_display = gr.Textbox(label="Selected Formats", interactive=False)
-            status = gr.Textbox(label="Status", interactive=False)
-        with gr.Column(scale=1):
-            grab_info_btn = gr.Button("Grab Information")
-            download_video_btn = gr.Button("Download Video")
-            download_audio_btn = gr.Button("Download Audio")
-    
-    # Connect buttons to functions
-    grab_info_btn.click(
-        fn=grab_metadata,
-        inputs=[url_input],
-        outputs=[metadata_display, format_display]
-    )
-    download_video_btn.click(
-        fn=download_video,
-        inputs=[url_input],
-        outputs=[status]
-    )
-    download_audio_btn.click(
-        fn=download_audio,
-        inputs=[url_input],
-        outputs=[status]
-    )
+    with gr.Tabs():
+        with gr.TabItem("Download"):
+            with gr.Row():
+                with gr.Column(scale=2):
+                    url_input = gr.Textbox(label="YouTube URL", placeholder="Paste YouTube URL here")
+                    metadata_display = gr.Textbox(label="Metadata Summary", lines=10, interactive=False)
+                    format_display = gr.Textbox(label="Selected Formats", interactive=False)
+                    status = gr.Textbox(label="Status", interactive=False)
+                with gr.Column(scale=1):
+                    grab_info_btn = gr.Button("Grab Information")
+                    download_video_btn = gr.Button("Download Video")
+                    download_audio_btn = gr.Button("Download Audio")
+            
+            # Connect buttons to functions
+            grab_info_btn.click(
+                fn=grab_metadata,
+                inputs=[url_input],
+                outputs=[metadata_display, format_display]
+            )
+            download_video_btn.click(
+                fn=download_video,
+                inputs=[url_input],
+                outputs=[status]
+            )
+            download_audio_btn.click(
+                fn=download_audio,
+                inputs=[url_input],
+                outputs=[status]
+            )
+        
+        with gr.TabItem("Split Audio"):
+            with gr.Row():
+                with gr.Column(scale=1):
+                    audio_input = gr.Audio(label="Upload Audio File", type="filepath")
+                with gr.Column(scale=1):
+                    audio_files = gr.Dropdown(
+                        label="Select Audio File",
+                        choices=get_audio_files(),
+                        type="value",
+                        interactive=True
+                    )
+            with gr.Row():
+                with gr.Column():
+                    split_size = gr.Dropdown(
+                        label="Split Size",
+                        choices=["10s", "30s", "45s", "60s", "100s", "Custom"],
+                        type="value",
+                        interactive=True
+                    )
+                    custom_split_size = gr.Textbox(
+                        label="Custom Split Size (in seconds)",
+                        visible=False
+                    )
+                    
+                    def update_custom_visibility(choice):
+                        return gr.update(visible=choice == "Custom")
+                    
+                    split_size.change(fn=update_custom_visibility, inputs=[split_size], outputs=[custom_split_size])
+                    split_btn = gr.Button("Split Audio")
+                    split_status = gr.Textbox(label="Split Status", interactive=False)
+                    
+                    def process_split(audio_path, size_choice, custom_size=None):
+                        try:
+                            # Handle both uploaded files and selected files from dropdown
+                            if not audio_path and not audio_files.value:
+                                return "Please select or upload an audio file"
+                            
+                            # Use the selected file from dropdown if no upload
+                            if not audio_path and audio_files.value:
+                                audio_path = os.path.join("audio", audio_files.value)
+                            
+                            # Convert size choice to seconds
+                            if size_choice == "Custom":
+                                if not custom_size or not custom_size.isdigit():
+                                    return "Please enter a valid number of seconds"
+                                split_size = int(custom_size)
+                            else:
+                                split_size = int(size_choice.rstrip("s"))
+                            
+                            # Perform the split
+                            split_files = split_audio(audio_path, split_size)
+                            return f"Successfully split audio into {len(split_files)} chunks"
+                        except Exception as e:
+                            return f"Error: {str(e)}"
+                    
+                    split_btn.click(
+                        fn=process_split,
+                        inputs=[audio_input, split_size, custom_split_size],
+                        outputs=[split_status]
+                    )
+                    
+                    # Refresh audio files list when new file is uploaded
+                    audio_input.change(
+                        fn=lambda: gr.update(choices=get_audio_files()),
+                        outputs=[audio_files]
+                    )
 
 # Launch the interface
 ui.launch()

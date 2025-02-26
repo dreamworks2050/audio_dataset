@@ -6,9 +6,18 @@ video/*
 audio/*
 !audio/.gitkeep
 
+# Ignore split audio content
+audio_split/*
+!audio_split/.gitkeep
+
 # Ignore metadata files
 metadata/*
 !metadata/.gitkeep
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Environment variables
 .env
