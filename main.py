@@ -3,7 +3,24 @@ from datetime import datetime
 import json
 from download.downloader import get_youtube_metadata, download_video, download_audio
 import os
-from split.split import get_audio_files, split_audio
+from split.split import get_audio_files, split_audio, process_split, update_custom_visibility
+from utils.logger import logger
+import signal
+import sys
+from utils.logger import Logger
+
+# Initialize logger
+logger = Logger()
+
+def signal_handler(sig, frame):
+    """Handle keyboard interrupt (Ctrl+C) gracefully."""
+    logger.info('\nReceived keyboard interrupt (Ctrl+C). Performing cleanup...')
+    # Add any cleanup operations here
+    logger.info('Cleanup complete. Exiting gracefully.')
+    sys.exit(0)
+
+# Register signal handler
+signal.signal(signal.SIGINT, signal_handler)
 
 # Save metadata to a file
 def save_metadata(metadata):
@@ -108,18 +125,24 @@ def summarize_metadata(metadata):
 def grab_metadata(url):
     """Fetch metadata and update Gradio components."""
     if not url:
+        logger.warning("No URL provided")
         return "Please enter a URL", ""
     try:
+        logger.info(f"Fetching metadata for URL: {url}")
         metadata = get_youtube_metadata(url)
+        logger.debug("Saving metadata to file")
         save_metadata(metadata)
+        logger.debug("Processing metadata summary")
         summary, video_format, audio_format = summarize_metadata(metadata)
         selected_formats = (
             f"Selected formats for download:\n\n"
             f"Download Video: {video_format}\n"
             f"Download Audio: {audio_format}"
         )
+        logger.info("Successfully processed metadata")
         return summary, selected_formats
     except Exception as e:
+        logger.error(f"Error processing metadata: {str(e)}")
         return f"Error: {str(e)}", ""
 
 # Build Gradio interface
@@ -171,6 +194,7 @@ with gr.Blocks() as ui:
                         label="Split Size",
                         choices=["10s", "30s", "45s", "60s", "100s", "Custom"],
                         type="value",
+                        value="60s",
                         interactive=True
                     )
                     custom_split_size = gr.Textbox(
@@ -189,9 +213,6 @@ with gr.Blocks() as ui:
                         visible=False
                     )
                     
-                    def update_custom_visibility(choice, field_type):
-                        return gr.update(visible=choice == "Custom")
-                    
                     split_size.change(
                         fn=lambda x: update_custom_visibility(x, "split"),
                         inputs=[split_size],
@@ -204,48 +225,6 @@ with gr.Blocks() as ui:
                     )
                     split_btn = gr.Button("Split Audio")
                     split_status = gr.Textbox(label="Split Status", interactive=False)
-                    
-                    def process_split(audio_path, size_choice, custom_size=None, overlap_choice="None", custom_overlap=None):
-                        try:
-                            # Handle both uploaded files and selected files from dropdown
-                            if not audio_path and not audio_files.value:
-                                return "Please select or upload an audio file"
-                            
-                            # Use the selected file from dropdown if no upload
-                            if not audio_path and audio_files.value:
-                                audio_path = os.path.join("audio", audio_files.value)
-                            
-                            # Convert size choice to seconds
-                            if size_choice == "Custom":
-                                if not custom_size or not custom_size.isdigit():
-                                    return "Please enter a valid number of seconds"
-                                split_size = int(custom_size)
-                            else:
-                                split_size = int(size_choice.rstrip("s"))
-                            
-                            # Convert overlap choice to seconds
-                            overlap_size = 0
-                            if overlap_choice != "None":
-                                if overlap_choice == "Custom":
-                                    if not custom_overlap or not custom_overlap.isdigit():
-                                        return "Please enter a valid number of seconds for overlap"
-                                    overlap_size = int(custom_overlap)
-                                else:
-                                    overlap_size = int(overlap_choice.rstrip("s"))
-                            
-                            # Validate overlap size
-                            if overlap_size * 2 >= split_size - 0.5:
-                                warning = (f"Warning: Total overlap duration ({overlap_size * 2}s) must be less than "
-                                          f"chunk size ({split_size}s) minus 0.5s minimum gap.\n"
-                                          f"Please reduce overlap size or increase chunk size.")
-                                print(warning)  # Log to console
-                                return warning
-                            
-                            # Perform the split
-                            split_files, summary = split_audio(audio_path, split_size, overlap_size)
-                            return summary
-                        except Exception as e:
-                            return f"Error: {str(e)}"
                     
                     split_btn.click(
                         fn=process_split,

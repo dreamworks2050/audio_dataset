@@ -24,6 +24,65 @@ def clean_audio_split_directory():
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
+def update_custom_visibility(choice, field_type):
+    """Update visibility of custom input fields based on dropdown selection."""
+    return {'visible': choice == "Custom"}
+
+def process_split(audio_path, size_choice, custom_size=None, overlap_choice="None", custom_overlap=None, audio_files_value=None):
+    """Process audio file splitting with the specified parameters.
+    
+    Args:
+        audio_path (str): Path to uploaded audio file
+        size_choice (str): Selected split size option
+        custom_size (str, optional): Custom split size in seconds
+        overlap_choice (str, optional): Selected overlap option
+        custom_overlap (str, optional): Custom overlap size in seconds
+        audio_files_value (str, optional): Selected file from dropdown
+    
+    Returns:
+        str: Status message or summary of the split operation
+    """
+    try:
+        # Handle both uploaded files and selected files from dropdown
+        if not audio_path and not audio_files_value:
+            return "Please select or upload an audio file"
+        
+        # Use the selected file from dropdown if no upload
+        if not audio_path and audio_files_value:
+            audio_path = os.path.join("audio", audio_files_value)
+        
+        # Convert size choice to seconds
+        if size_choice == "Custom":
+            if not custom_size or not custom_size.isdigit():
+                return "Please enter a valid number of seconds"
+            split_size = int(custom_size)
+        else:
+            split_size = int(size_choice.rstrip("s"))
+        
+        # Convert overlap choice to seconds
+        overlap_size = 0
+        if overlap_choice != "None":
+            if overlap_choice == "Custom":
+                if not custom_overlap or not custom_overlap.isdigit():
+                    return "Please enter a valid number of seconds for overlap"
+                overlap_size = int(custom_overlap)
+            else:
+                overlap_size = int(overlap_choice.rstrip("s"))
+        
+        # Validate overlap size
+        if overlap_size * 2 >= split_size - 0.5:
+            warning = (f"Warning: Total overlap duration ({overlap_size * 2}s) must be less than "
+                      f"chunk size ({split_size}s) minus 0.5s minimum gap.\n"
+                      f"Please reduce overlap size or increase chunk size.")
+            print(warning)  # Log to console
+            return warning
+        
+        # Perform the split
+        split_files, summary = split_audio(audio_path, split_size, overlap_size)
+        return summary
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 def split_audio(file_path, split_size, overlap_size=0):
     """Split an audio file into chunks of specified size with optional overlap.
     
