@@ -177,15 +177,35 @@ with gr.Blocks() as ui:
                         label="Custom Split Size (in seconds)",
                         visible=False
                     )
+                    overlap_size = gr.Dropdown(
+                        label="Overlap",
+                        choices=["None", "5s", "10s", "15s", "20s", "25s", "30s", "Custom"],
+                        type="value",
+                        value="None",
+                        interactive=True
+                    )
+                    custom_overlap_size = gr.Textbox(
+                        label="Custom Overlap Size (in seconds)",
+                        visible=False
+                    )
                     
-                    def update_custom_visibility(choice):
+                    def update_custom_visibility(choice, field_type):
                         return gr.update(visible=choice == "Custom")
                     
-                    split_size.change(fn=update_custom_visibility, inputs=[split_size], outputs=[custom_split_size])
+                    split_size.change(
+                        fn=lambda x: update_custom_visibility(x, "split"),
+                        inputs=[split_size],
+                        outputs=[custom_split_size]
+                    )
+                    overlap_size.change(
+                        fn=lambda x: update_custom_visibility(x, "overlap"),
+                        inputs=[overlap_size],
+                        outputs=[custom_overlap_size]
+                    )
                     split_btn = gr.Button("Split Audio")
                     split_status = gr.Textbox(label="Split Status", interactive=False)
                     
-                    def process_split(audio_path, size_choice, custom_size=None):
+                    def process_split(audio_path, size_choice, custom_size=None, overlap_choice="None", custom_overlap=None):
                         try:
                             # Handle both uploaded files and selected files from dropdown
                             if not audio_path and not audio_files.value:
@@ -203,15 +223,33 @@ with gr.Blocks() as ui:
                             else:
                                 split_size = int(size_choice.rstrip("s"))
                             
+                            # Convert overlap choice to seconds
+                            overlap_size = 0
+                            if overlap_choice != "None":
+                                if overlap_choice == "Custom":
+                                    if not custom_overlap or not custom_overlap.isdigit():
+                                        return "Please enter a valid number of seconds for overlap"
+                                    overlap_size = int(custom_overlap)
+                                else:
+                                    overlap_size = int(overlap_choice.rstrip("s"))
+                            
+                            # Validate overlap size
+                            if overlap_size * 2 >= split_size - 0.5:
+                                warning = (f"Warning: Total overlap duration ({overlap_size * 2}s) must be less than "
+                                          f"chunk size ({split_size}s) minus 0.5s minimum gap.\n"
+                                          f"Please reduce overlap size or increase chunk size.")
+                                print(warning)  # Log to console
+                                return warning
+                            
                             # Perform the split
-                            split_files = split_audio(audio_path, split_size)
-                            return f"Successfully split audio into {len(split_files)} chunks"
+                            split_files, summary = split_audio(audio_path, split_size, overlap_size)
+                            return summary
                         except Exception as e:
                             return f"Error: {str(e)}"
                     
                     split_btn.click(
                         fn=process_split,
-                        inputs=[audio_input, split_size, custom_split_size],
+                        inputs=[audio_input, split_size, custom_split_size, overlap_size, custom_overlap_size],
                         outputs=[split_status]
                     )
                     

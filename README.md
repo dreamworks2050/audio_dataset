@@ -1,13 +1,17 @@
-# YouTube Video Downloader v0.1.1
+# YouTube Video Downloader v0.1.2
 
-A Python-based tool with a user-friendly interface for downloading YouTube videos, extracting high-quality audio tracks, and splitting audio files into smaller chunks.
+A Python-based tool with a user-friendly interface for downloading YouTube videos, extracting high-quality audio tracks, and splitting audio files into smaller chunks with advanced overlap control.
 
 ## Features
 
 - Easy-to-use interface for downloading videos and audio from YouTube
 - Real-time metadata display showing video information before download
 - Multiple format options for both video and audio downloads
-- Built-in audio splitting functionality with customizable chunk sizes
+- Advanced audio splitting functionality with:
+  - Customizable chunk sizes
+  - Configurable overlap settings
+  - Detailed overlap validation
+  - Real-time splitting progress
 - Clean and organized file management
 
 ## Project Structure
@@ -55,10 +59,17 @@ A Python-based tool with a user-friendly interface for downloading YouTube video
 2. **Split Settings**
    - Choose from preset split durations (10s, 30s, 45s, 60s, 100s)
    - Select "Custom" for a specific duration in seconds
+   - Set overlap duration between chunks:
+     - Choose from preset overlap durations
+     - Enter custom overlap duration
+     - Disable overlap with "None" option
 
 3. **Processing**
    - Click "Split Audio" to divide the file into chunks
-   - View the operation status in real-time
+   - View detailed processing information:
+     - Chunk timecodes and durations
+     - Overlap validation results
+     - Processing summary
 
 ## Installation
 
@@ -74,7 +85,14 @@ A Python-based tool with a user-friendly interface for downloading YouTube video
 
 ## Version History
 
-### v0.1.1 (Current)
+### v0.1.2 (Current)
+
+- Added customizable overlap settings for audio splitting
+- Implemented detailed overlap validation
+- Enhanced progress reporting with chunk information
+- Improved error handling and validation
+
+### v0.1.1
 
 - Initial release with user-friendly interface
 - Support for high-quality video and audio downloads
