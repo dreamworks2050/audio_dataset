@@ -1,6 +1,7 @@
 import os
 from pydub import AudioSegment
 from utils.logger import logger
+from .state import save_split_state
 
 # Ensure directories exist
 AUDIO_DIR = "audio"
@@ -168,4 +169,14 @@ def split_audio(file_path, split_size, overlap_size=0):
     )
     
     logger.info(summary)
+    
+    # Save the split state
+    save_split_state(
+        original_file=os.path.basename(file_path),
+        split_size=split_size,
+        overlap_size=overlap_size,
+        split_files=split_files,
+        total_duration=duration/1000  # Convert from milliseconds to seconds
+    )
+    
     return split_files, summary

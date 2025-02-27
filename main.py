@@ -252,6 +252,9 @@ with gr.Blocks() as ui:
                         fn=lambda: gr.update(choices=get_audio_files()),
                         outputs=[audio_files]
                     )
+        
+        from transcribe import create_transcribe_tab
+        create_transcribe_tab()
 
 # Launch the interface
 ui.launch()

@@ -2132,3 +2132,317 @@ Overlaps validated: 11
 Consistent overlaps: 10
 Inconsistent overlaps: 1 << Expected
 
+2025-02-27 11:52:22 - DEBUG - Directory already exists: audio
+2025-02-27 11:52:22 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:52:22 - INFO - Found 4 audio files in audio
+2025-02-27 11:52:28 - DEBUG - Directory already exists: audio
+2025-02-27 11:52:28 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:52:28 - INFO - Found 4 audio files in audio
+2025-02-27 11:55:27 - DEBUG - Directory already exists: audio
+2025-02-27 11:55:27 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:55:27 - INFO - Found 4 audio files in audio
+2025-02-27 11:56:14 - DEBUG - Directory already exists: audio
+2025-02-27 11:56:14 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:56:14 - INFO - Found 4 audio files in audio
+2025-02-27 11:56:14 - DEBUG - Directory already exists: audio
+2025-02-27 11:56:14 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:56:14 - INFO - Found 4 audio files in audio
+2025-02-27 11:56:34 - INFO - Fetching metadata for URL: https://www.youtube.com/watch?v=FMU0j_ly4kk&ab_channel=EastMoney
+2025-02-27 11:56:37 - DEBUG - Successfully fetched metadata for video: The Man Behind DeepSeek (Liang Wenfeng)
+2025-02-27 11:56:41 - INFO - Fetching metadata for URL: https://www.youtube.com/watch?v=FMU0j_ly4kk&ab_channel=EastMoney
+2025-02-27 11:56:44 - DEBUG - Successfully fetched metadata for video: The Man Behind DeepSeek (Liang Wenfeng)
+2025-02-27 11:56:44 - INFO - Selected audio format: 148.75kbps
+2025-02-27 11:56:44 - DEBUG - Starting audio download
+2025-02-27 11:56:49 - INFO - Audio download completed successfully
+2025-02-27 11:56:54 - DEBUG - Directory already exists: audio
+2025-02-27 11:56:54 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:56:54 - INFO - Found 5 audio files in audio
+2025-02-27 11:56:54 - DEBUG - Directory already exists: audio
+2025-02-27 11:56:54 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:56:54 - INFO - Found 5 audio files in audio
+2025-02-27 11:57:05 - DEBUG - Directory already exists: audio
+2025-02-27 11:57:05 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:57:05 - INFO - Cleaning audio_split directory
+2025-02-27 11:57:05 - DEBUG - Removed 12 files from audio_split
+2025-02-27 11:57:05 - INFO - Loading audio file: Feed Your OWN Documents to a Local Large Language Model!_129.476kbps.wav
+2025-02-27 11:57:05 - DEBUG - Successfully loaded audio file: Feed Your OWN Documents to a Local Large Language Model!_129.476kbps.wav
+2025-02-27 11:57:05 - INFO - Audio duration: 1132.46s, Split size: 100s, Overlap: 20s
+2025-02-27 11:57:05 - DEBUG - Processing chunk 01: 0.00s -> 120.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 0.00s -> 100.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 01
+2025-02-27 11:57:05 - DEBUG - Processing chunk 02: 80.00s -> 220.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 100.00s -> 200.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 02
+2025-02-27 11:57:05 - DEBUG - Processing chunk 03: 180.00s -> 320.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 200.00s -> 300.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 03
+2025-02-27 11:57:05 - DEBUG - Processing chunk 04: 280.00s -> 420.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 300.00s -> 400.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 04
+2025-02-27 11:57:05 - DEBUG - Processing chunk 05: 380.00s -> 520.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 400.00s -> 500.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 05
+2025-02-27 11:57:05 - DEBUG - Processing chunk 06: 480.00s -> 620.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 500.00s -> 600.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 06
+2025-02-27 11:57:05 - DEBUG - Processing chunk 07: 580.00s -> 720.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 600.00s -> 700.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 07
+2025-02-27 11:57:05 - DEBUG - Processing chunk 08: 680.00s -> 820.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 700.00s -> 800.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 08
+2025-02-27 11:57:05 - DEBUG - Processing chunk 09: 780.00s -> 920.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 800.00s -> 900.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 09
+2025-02-27 11:57:05 - DEBUG - Processing chunk 10: 880.00s -> 1020.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 900.00s -> 1000.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 10
+2025-02-27 11:57:05 - DEBUG - Processing chunk 11: 980.00s -> 1120.00s
+2025-02-27 11:57:05 - DEBUG - Main segment: 1000.00s -> 1100.00s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 11
+2025-02-27 11:57:05 - DEBUG - Processing chunk 12: 1080.00s -> 1132.46s
+2025-02-27 11:57:05 - DEBUG - Main segment: 1100.00s -> 1132.46s
+2025-02-27 11:57:05 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:57:05 - DEBUG - Successfully exported chunk 12
+2025-02-27 11:57:05 - INFO - Performing enhanced overlap verification
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 1 and 2 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 2 and 3 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 3 and 4 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 4 and 5 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 5 and 6 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 6 and 7 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 7 and 8 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 8 and 9 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 9 and 10 is consistent
+2025-02-27 11:57:05 - DEBUG - Overlap between chunks 10 and 11 is consistent
+2025-02-27 11:57:05 - WARNING - Overlap between chunks 11 and 12 is inconsistent
+2025-02-27 11:57:05 - DEBUG - Expected: 20.00s, Actual: 40.00s
+2025-02-27 11:57:05 - DEBUG - Type: Final Overlap
+2025-02-27 11:57:05 - DEBUG - Deviation: 20.000s
+2025-02-27 11:57:05 - INFO - Splitting Summary:
+Total chunks created: 12
+Overlaps validated: 11
+Consistent overlaps: 10
+Inconsistent overlaps: 1 << Expected
+
+2025-02-27 11:57:05 - INFO - Split state saved to audio_split/split_state.json
+2025-02-27 11:58:35 - DEBUG - Directory already exists: audio
+2025-02-27 11:58:35 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:58:35 - INFO - Found 5 audio files in audio
+2025-02-27 11:58:35 - DEBUG - Directory already exists: audio
+2025-02-27 11:58:35 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:58:35 - INFO - Found 5 audio files in audio
+2025-02-27 11:58:40 - DEBUG - Directory already exists: audio
+2025-02-27 11:58:40 - DEBUG - Directory already exists: audio
+2025-02-27 11:58:40 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:58:40 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:58:40 - INFO - Found 5 audio files in audio
+2025-02-27 11:58:40 - INFO - Found 5 audio files in audio
+2025-02-27 11:58:52 - DEBUG - Directory already exists: audio
+2025-02-27 11:58:52 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:58:52 - INFO - Cleaning audio_split directory
+2025-02-27 11:58:52 - DEBUG - Removed 13 files from audio_split
+2025-02-27 11:58:52 - INFO - Loading audio file: The Man Behind DeepSeek (Liang Wenfeng)_148.75kbps.wav
+2025-02-27 11:58:52 - DEBUG - Successfully loaded audio file: The Man Behind DeepSeek (Liang Wenfeng)_148.75kbps.wav
+2025-02-27 11:58:52 - INFO - Audio duration: 1082.66s, Split size: 100s, Overlap: 20s
+2025-02-27 11:58:52 - DEBUG - Processing chunk 01: 0.00s -> 120.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 0.00s -> 100.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 01
+2025-02-27 11:58:52 - DEBUG - Processing chunk 02: 80.00s -> 220.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 100.00s -> 200.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 02
+2025-02-27 11:58:52 - DEBUG - Processing chunk 03: 180.00s -> 320.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 200.00s -> 300.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 03
+2025-02-27 11:58:52 - DEBUG - Processing chunk 04: 280.00s -> 420.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 300.00s -> 400.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 04
+2025-02-27 11:58:52 - DEBUG - Processing chunk 05: 380.00s -> 520.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 400.00s -> 500.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 05
+2025-02-27 11:58:52 - DEBUG - Processing chunk 06: 480.00s -> 620.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 500.00s -> 600.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 06
+2025-02-27 11:58:52 - DEBUG - Processing chunk 07: 580.00s -> 720.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 600.00s -> 700.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 07
+2025-02-27 11:58:52 - DEBUG - Processing chunk 08: 680.00s -> 820.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 700.00s -> 800.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 08
+2025-02-27 11:58:52 - DEBUG - Processing chunk 09: 780.00s -> 920.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 800.00s -> 900.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 09
+2025-02-27 11:58:52 - DEBUG - Processing chunk 10: 880.00s -> 1020.00s
+2025-02-27 11:58:52 - DEBUG - Main segment: 900.00s -> 1000.00s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Right overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 10
+2025-02-27 11:58:52 - DEBUG - Processing chunk 11: 980.00s -> 1082.66s
+2025-02-27 11:58:52 - DEBUG - Main segment: 1000.00s -> 1082.66s
+2025-02-27 11:58:52 - DEBUG - Left overlap: 20.00s
+2025-02-27 11:58:52 - DEBUG - Successfully exported chunk 11
+2025-02-27 11:58:52 - INFO - Performing enhanced overlap verification
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 1 and 2 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 2 and 3 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 3 and 4 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 4 and 5 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 5 and 6 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 6 and 7 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 7 and 8 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 8 and 9 is consistent
+2025-02-27 11:58:52 - DEBUG - Overlap between chunks 9 and 10 is consistent
+2025-02-27 11:58:52 - WARNING - Overlap between chunks 10 and 11 is inconsistent
+2025-02-27 11:58:52 - DEBUG - Expected: 20.00s, Actual: 40.00s
+2025-02-27 11:58:52 - DEBUG - Type: Final Overlap
+2025-02-27 11:58:52 - DEBUG - Deviation: 20.000s
+2025-02-27 11:58:52 - INFO - Splitting Summary:
+Total chunks created: 11
+Overlaps validated: 10
+Consistent overlaps: 9
+Inconsistent overlaps: 1 << Expected
+
+2025-02-27 11:58:52 - INFO - Split state saved to audio_split/split_state.json
+2025-02-27 12:00:47 - DEBUG - Directory already exists: audio
+2025-02-27 12:00:47 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:00:47 - INFO - Found 5 audio files in audio
+2025-02-27 12:01:11 - INFO - Fetching metadata for URL: https://www.youtube.com/watch?v=qU3fmidNbJE&ab_channel=TinaHuang
+2025-02-27 12:01:14 - DEBUG - Successfully fetched metadata for video: AI Agents Fundamentals In 21 Minutes
+2025-02-27 12:01:18 - INFO - Fetching metadata for URL: https://www.youtube.com/watch?v=qU3fmidNbJE&ab_channel=TinaHuang
+2025-02-27 12:01:21 - DEBUG - Successfully fetched metadata for video: AI Agents Fundamentals In 21 Minutes
+2025-02-27 12:01:21 - INFO - Selected audio format: 142.98kbps
+2025-02-27 12:01:21 - DEBUG - Starting audio download
+2025-02-27 12:01:27 - INFO - Audio download completed successfully
+2025-02-27 12:01:29 - DEBUG - Directory already exists: audio
+2025-02-27 12:01:29 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:01:29 - INFO - Found 6 audio files in audio
+2025-02-27 12:01:51 - DEBUG - Directory already exists: audio
+2025-02-27 12:01:51 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:01:51 - INFO - Cleaning audio_split directory
+2025-02-27 12:01:51 - DEBUG - Removed 12 files from audio_split
+2025-02-27 12:01:51 - INFO - Loading audio file: The Man Behind DeepSeek (Liang Wenfeng)_148.75kbps.wav
+2025-02-27 12:01:51 - DEBUG - Successfully loaded audio file: The Man Behind DeepSeek (Liang Wenfeng)_148.75kbps.wav
+2025-02-27 12:01:51 - INFO - Audio duration: 1082.66s, Split size: 100s, Overlap: 20s
+2025-02-27 12:01:51 - DEBUG - Processing chunk 01: 0.00s -> 120.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 0.00s -> 100.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 01
+2025-02-27 12:01:51 - DEBUG - Processing chunk 02: 80.00s -> 220.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 100.00s -> 200.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 02
+2025-02-27 12:01:51 - DEBUG - Processing chunk 03: 180.00s -> 320.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 200.00s -> 300.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 03
+2025-02-27 12:01:51 - DEBUG - Processing chunk 04: 280.00s -> 420.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 300.00s -> 400.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 04
+2025-02-27 12:01:51 - DEBUG - Processing chunk 05: 380.00s -> 520.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 400.00s -> 500.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 05
+2025-02-27 12:01:51 - DEBUG - Processing chunk 06: 480.00s -> 620.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 500.00s -> 600.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 06
+2025-02-27 12:01:51 - DEBUG - Processing chunk 07: 580.00s -> 720.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 600.00s -> 700.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 07
+2025-02-27 12:01:51 - DEBUG - Processing chunk 08: 680.00s -> 820.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 700.00s -> 800.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 08
+2025-02-27 12:01:51 - DEBUG - Processing chunk 09: 780.00s -> 920.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 800.00s -> 900.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 09
+2025-02-27 12:01:51 - DEBUG - Processing chunk 10: 880.00s -> 1020.00s
+2025-02-27 12:01:51 - DEBUG - Main segment: 900.00s -> 1000.00s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Right overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 10
+2025-02-27 12:01:51 - DEBUG - Processing chunk 11: 980.00s -> 1082.66s
+2025-02-27 12:01:51 - DEBUG - Main segment: 1000.00s -> 1082.66s
+2025-02-27 12:01:51 - DEBUG - Left overlap: 20.00s
+2025-02-27 12:01:51 - DEBUG - Successfully exported chunk 11
+2025-02-27 12:01:51 - INFO - Performing enhanced overlap verification
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 1 and 2 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 2 and 3 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 3 and 4 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 4 and 5 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 5 and 6 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 6 and 7 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 7 and 8 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 8 and 9 is consistent
+2025-02-27 12:01:51 - DEBUG - Overlap between chunks 9 and 10 is consistent
+2025-02-27 12:01:51 - WARNING - Overlap between chunks 10 and 11 is inconsistent
+2025-02-27 12:01:51 - DEBUG - Expected: 20.00s, Actual: 40.00s
+2025-02-27 12:01:51 - DEBUG - Type: Final Overlap
+2025-02-27 12:01:51 - DEBUG - Deviation: 20.000s
+2025-02-27 12:01:51 - INFO - Splitting Summary:
+Total chunks created: 11
+Overlaps validated: 10
+Consistent overlaps: 9
+Inconsistent overlaps: 1 << Expected
+
+2025-02-27 12:01:51 - INFO - Split state saved to audio_split/split_state.json
+2025-02-27 12:06:16 - DEBUG - Directory already exists: audio
+2025-02-27 12:06:16 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:06:16 - INFO - Found 6 audio files in audio
+2025-02-27 12:06:20 - DEBUG - Directory already exists: audio
+2025-02-27 12:06:20 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:06:20 - INFO - Found 6 audio files in audio
+2025-02-27 12:12:42 - DEBUG - Directory already exists: audio
+2025-02-27 12:12:42 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:12:42 - INFO - Found 6 audio files in audio
+2025-02-27 12:15:25 - DEBUG - Directory already exists: audio
+2025-02-27 12:15:25 - DEBUG - Directory already exists: audio_split
+2025-02-27 12:15:25 - INFO - Found 6 audio files in audio
