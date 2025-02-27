@@ -2040,3 +2040,95 @@ Overlaps validated: 25
 Consistent overlaps: 24
 Inconsistent overlaps: 1 << Expected
 
+2025-02-27 11:02:57 - DEBUG - Directory already exists: audio
+2025-02-27 11:02:57 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:02:57 - INFO - Found 4 audio files in audio
+2025-02-27 11:03:00 - DEBUG - Directory already exists: audio
+2025-02-27 11:03:00 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:03:00 - INFO - Found 4 audio files in audio
+2025-02-27 11:03:12 - DEBUG - Directory already exists: audio
+2025-02-27 11:03:12 - DEBUG - Directory already exists: audio_split
+2025-02-27 11:03:12 - INFO - Cleaning audio_split directory
+2025-02-27 11:03:12 - DEBUG - Removed 26 files from audio_split
+2025-02-27 11:03:12 - INFO - Loading audio file: Feed Your OWN Documents to a Local Large Language Model!_129.476kbps.wav
+2025-02-27 11:03:12 - DEBUG - Successfully loaded audio file: Feed Your OWN Documents to a Local Large Language Model!_129.476kbps.wav
+2025-02-27 11:03:12 - INFO - Audio duration: 1132.46s, Split size: 100s, Overlap: 30s
+2025-02-27 11:03:12 - DEBUG - Processing chunk 01: 0.00s -> 130.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 0.00s -> 100.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 01
+2025-02-27 11:03:12 - DEBUG - Processing chunk 02: 70.00s -> 230.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 100.00s -> 200.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 02
+2025-02-27 11:03:12 - DEBUG - Processing chunk 03: 170.00s -> 330.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 200.00s -> 300.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 03
+2025-02-27 11:03:12 - DEBUG - Processing chunk 04: 270.00s -> 430.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 300.00s -> 400.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 04
+2025-02-27 11:03:12 - DEBUG - Processing chunk 05: 370.00s -> 530.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 400.00s -> 500.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 05
+2025-02-27 11:03:12 - DEBUG - Processing chunk 06: 470.00s -> 630.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 500.00s -> 600.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 06
+2025-02-27 11:03:12 - DEBUG - Processing chunk 07: 570.00s -> 730.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 600.00s -> 700.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 07
+2025-02-27 11:03:12 - DEBUG - Processing chunk 08: 670.00s -> 830.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 700.00s -> 800.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 08
+2025-02-27 11:03:12 - DEBUG - Processing chunk 09: 770.00s -> 930.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 800.00s -> 900.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Successfully exported chunk 09
+2025-02-27 11:03:12 - DEBUG - Processing chunk 10: 870.00s -> 1030.00s
+2025-02-27 11:03:12 - DEBUG - Main segment: 900.00s -> 1000.00s
+2025-02-27 11:03:12 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:12 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:13 - DEBUG - Successfully exported chunk 10
+2025-02-27 11:03:13 - DEBUG - Processing chunk 11: 970.00s -> 1130.00s
+2025-02-27 11:03:13 - DEBUG - Main segment: 1000.00s -> 1100.00s
+2025-02-27 11:03:13 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:13 - DEBUG - Right overlap: 30.00s
+2025-02-27 11:03:13 - DEBUG - Successfully exported chunk 11
+2025-02-27 11:03:13 - DEBUG - Processing chunk 12: 1070.00s -> 1132.46s
+2025-02-27 11:03:13 - DEBUG - Main segment: 1100.00s -> 1132.46s
+2025-02-27 11:03:13 - DEBUG - Left overlap: 30.00s
+2025-02-27 11:03:13 - DEBUG - Successfully exported chunk 12
+2025-02-27 11:03:13 - INFO - Performing enhanced overlap verification
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 1 and 2 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 2 and 3 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 3 and 4 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 4 and 5 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 5 and 6 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 6 and 7 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 7 and 8 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 8 and 9 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 9 and 10 is consistent
+2025-02-27 11:03:13 - DEBUG - Overlap between chunks 10 and 11 is consistent
+2025-02-27 11:03:13 - WARNING - Overlap between chunks 11 and 12 is inconsistent
+2025-02-27 11:03:13 - DEBUG - Expected: 30.00s, Actual: 60.00s
+2025-02-27 11:03:13 - DEBUG - Type: Final Overlap
+2025-02-27 11:03:13 - DEBUG - Deviation: 30.000s
+2025-02-27 11:03:13 - INFO - Splitting Summary:
+Total chunks created: 12
+Overlaps validated: 11
+Consistent overlaps: 10
+Inconsistent overlaps: 1 << Expected
+

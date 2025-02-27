@@ -4,15 +4,12 @@ import json
 from download.downloader import get_youtube_metadata, download_video, download_audio
 import os
 from split.split import get_audio_files, split_audio
-from utils.logger import logger
 
 # Save metadata to a file
 def save_metadata(metadata):
     """Save metadata to a JSON file in the 'metadata' directory."""
-    logger.debug("Creating metadata directory if not exists")
     os.makedirs("metadata", exist_ok=True)
     filename = "metadata/metadata_01.txt"
-    logger.info(f"Saving metadata to {filename}")
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(json.dumps(metadata, indent=2))
     return filename
@@ -111,10 +108,8 @@ def summarize_metadata(metadata):
 def grab_metadata(url):
     """Fetch metadata and update Gradio components."""
     if not url:
-        logger.warning("Empty URL provided")
         return "Please enter a URL", ""
     try:
-        logger.info(f"Attempting to fetch metadata for URL: {url}")
         metadata = get_youtube_metadata(url)
         save_metadata(metadata)
         summary, video_format, audio_format = summarize_metadata(metadata)
@@ -123,15 +118,12 @@ def grab_metadata(url):
             f"Download Video: {video_format}\n"
             f"Download Audio: {audio_format}"
         )
-        logger.debug("Successfully processed metadata and formats")
         return summary, selected_formats
     except Exception as e:
-        logger.error(f"Failed to process metadata: {str(e)}")
         return f"Error: {str(e)}", ""
 
 # Build Gradio interface
 with gr.Blocks() as ui:
-    logger.info("Initializing Gradio interface")
     with gr.Tabs():
         with gr.TabItem("Download"):
             with gr.Row():
@@ -193,7 +185,7 @@ with gr.Blocks() as ui:
                     
                     overlap_size = gr.Dropdown(
                         label="Overlap Duration",
-                        choices=["None", "1s", "2s", "5s", "Custom"],
+                        choices=["1s", "5s", "10s", "15s", "20s", "25s", "30s", "45s", "Custom", "None"],
                         type="value",
                         value="None",
                         interactive=True
@@ -209,16 +201,8 @@ with gr.Blocks() as ui:
                             gr.update(visible=overlap_choice == "Custom")
                         ]
                     
-                    split_size.change(
-                        fn=update_visibility,
-                        inputs=[split_size, overlap_size],
-                        outputs=[custom_split_size, custom_overlap_size]
-                    )
-                    overlap_size.change(
-                        fn=update_visibility,
-                        inputs=[split_size, overlap_size],
-                        outputs=[custom_split_size, custom_overlap_size]
-                    )
+                    split_size.change(fn=update_visibility, inputs=[split_size, overlap_size], outputs=[custom_split_size, custom_overlap_size])
+                    overlap_size.change(fn=update_visibility, inputs=[split_size, overlap_size], outputs=[custom_split_size, custom_overlap_size])
                     
                     split_btn = gr.Button("Split Audio")
                     split_status = gr.Textbox(label="Split Status", interactive=False)
@@ -270,5 +254,4 @@ with gr.Blocks() as ui:
                     )
 
 # Launch the interface
-logger.info("Launching the application interface")
 ui.launch()
