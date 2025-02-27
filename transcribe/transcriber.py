@@ -70,15 +70,21 @@ class TranscriptionService:
                 
                 # Add initial prompt if provided
                 if initial_prompt:
-                    # Use --prompt directly instead of --prompt-file
-                    cmd.extend(["--prompt", initial_prompt])
-                    logger.debug(f"Using prompt: {initial_prompt[:50]}...")
+                    # Sanitize the prompt: remove any characters that could cause issues with command line
+                    sanitized_prompt = initial_prompt.replace('"', '\\"').replace('$', '\\$').replace('`', '\\`')
+                    # Add the prompt to the command arguments list
+                    # The subprocess.run with a list of arguments handles quoting automatically
+                    cmd.extend(["--prompt", sanitized_prompt])
+                    # Log the full prompt for debugging
+                    logger.debug(f"Using prompt (estimated tokens: {len(sanitized_prompt) // 4}): {sanitized_prompt}")
+                    # Also log the token count for easier debugging
+                    logger.debug(f"Prompt token count (estimated): {len(sanitized_prompt) // 4}")
                 
                 # Run whisper.cpp
-                cmd_str = ' '.join(cmd)
+                cmd_str = ' '.join(f'"{arg}"' if ' ' in arg else arg for arg in cmd)
                 logger.debug(f"Running whisper.cpp command: {cmd_str}")
                 result = subprocess.run(
-                    cmd,
+                    cmd,  # Using the list form ensures proper argument handling
                     capture_output=True,
                     text=True,
                     check=False

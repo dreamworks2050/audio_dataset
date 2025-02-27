@@ -5,6 +5,12 @@ from download.downloader import get_youtube_metadata, download_video, download_a
 import os
 from split.split import get_audio_files, split_audio
 from utils.cleanup import cleanup_python_cache
+from utils.logger import logger
+
+# Clear logs at startup
+logger.info("Starting application")
+logger.clear_logs()
+logger.info("Application started - logs cleared")
 
 # Save metadata to a file
 def save_metadata(metadata):
