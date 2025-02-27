@@ -69,3 +69,6 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Files with 'old' in the name
+*old*
