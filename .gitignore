@@ -23,9 +23,30 @@ logs/*
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environment
+venv/
+env/
+.env/
+.venv/
 
 # Environment variables
 .env
+.env.*
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
 
 # OS generated files
 .DS_Store
@@ -35,3 +56,16 @@ __pycache__/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Local development settings
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
