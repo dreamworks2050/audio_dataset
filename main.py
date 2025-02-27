@@ -4,6 +4,7 @@ import json
 from download.downloader import get_youtube_metadata, download_video, download_audio
 import os
 from split.split import get_audio_files, split_audio
+from utils.cleanup import cleanup_python_cache
 
 # Save metadata to a file
 def save_metadata(metadata):
@@ -121,6 +122,9 @@ def grab_metadata(url):
         return summary, selected_formats
     except Exception as e:
         return f"Error: {str(e)}", ""
+
+# Clean up Python cache files before starting
+cleanup_python_cache()
 
 # Build Gradio interface
 with gr.Blocks() as ui:

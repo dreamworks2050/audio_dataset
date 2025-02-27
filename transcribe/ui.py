@@ -1,6 +1,14 @@
 import gradio as gr
 from split.state import get_split_summary
 
+LANGUAGE_MAP = {
+    "Korean": "ko",
+    "English": "en",
+    "Chinese": "zh",
+    "Vietnamese": "vi",
+    "Spanish": "es"
+}
+
 def create_transcribe_tab():
     """Create and configure the transcribe tab UI components.
     
@@ -18,6 +26,13 @@ def create_transcribe_tab():
                 )
             with gr.Column(scale=1):
                 refresh_btn = gr.Button("Refresh Summary")
+                language = gr.Dropdown(
+                    label="Transcription Language",
+                    choices=["Korean", "English", "Chinese", "Vietnamese", "Spanish"],
+                    value="Korean",
+                    info="Select the language for transcription.",
+                    interactive=True
+                )
         
         # Wire up event handlers
         transcribe_tab.select(fn=update_summary, inputs=[], outputs=[summary_display])
