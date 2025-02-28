@@ -19,11 +19,27 @@ logs/*
 !logs/.gitkeep
 *.log
 
+# Ignore AI optimized audio files
+audio_ai_optimized/*
+!audio_ai_optimized/.gitkeep
+
+# Ignore transcription output
+audio_text/*
+!audio_text/.gitkeep
+transcriptions/
+**/transcription_*.txt
+**/transcription_*.json
+**/combined_transcription*.txt
+**/combined_transcription*.json
+
 # Python specific
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Distribution / packaging
 dist/
@@ -39,6 +55,7 @@ env/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # IDE specific files
 .idea/
@@ -72,3 +89,15 @@ Thumbs.db
 
 # Files with 'old' in the name
 *old*
+
+# Whisper models and related files
+models/*.bin
+models/*.pt
+whisper.cpp/models/*.bin
+whisper.cpp/models/*.pt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Optimization run directories
+run_*/

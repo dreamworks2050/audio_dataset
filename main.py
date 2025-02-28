@@ -135,6 +135,10 @@ cleanup_python_cache()
 # Build Gradio interface
 with gr.Blocks() as ui:
     with gr.Tabs():
+        # Import and create the AI Optimize tab (at the top)
+        from ai_optimize import create_ai_optimize_tab
+        create_ai_optimize_tab()
+        
         with gr.TabItem("Download"):
             with gr.Row():
                 with gr.Column(scale=2):

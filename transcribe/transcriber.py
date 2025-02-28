@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from pydub import AudioSegment
 from utils.logger import logger
+import time
 
 class TranscriptionService:
     """Service for transcribing audio using whisper.cpp."""
@@ -68,6 +69,10 @@ class TranscriptionService:
                     "--output-txt"
                 ]
                 
+                # Log language code specifically to debug any issues
+                logger.warning(f"WHISPER CMD LANGUAGE: Lang_code='{lang_code}' for transcription")
+                logger.debug(f"Using language code: '{lang_code}' for transcription")
+                
                 # Add initial prompt if provided
                 if initial_prompt:
                     # Sanitize the prompt: remove any characters that could cause issues with command line
@@ -83,16 +88,31 @@ class TranscriptionService:
                 # Run whisper.cpp
                 cmd_str = ' '.join(f'"{arg}"' if ' ' in arg else arg for arg in cmd)
                 logger.debug(f"Running whisper.cpp command: {cmd_str}")
-                result = subprocess.run(
-                    cmd,  # Using the list form ensures proper argument handling
-                    capture_output=True,
-                    text=True,
-                    check=False
-                )
+                
+                try:
+                    # Add a timeout to prevent the process from hanging indefinitely
+                    start_time = time.time()
+                    result = subprocess.run(
+                        cmd,  # Using the list form ensures proper argument handling
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        timeout=300  # 5 minute timeout for each chunk
+                    )
+                    elapsed_time = time.time() - start_time
+                    logger.debug(f"Whisper.cpp process completed in {elapsed_time:.2f} seconds")
+                
+                except subprocess.TimeoutExpired:
+                    logger.error(f"Whisper.cpp process timed out after 300 seconds for file: {temp_filename}")
+                    return None
+                except Exception as e:
+                    logger.error(f"Unexpected error running whisper.cpp: {str(e)}", exc_info=True)
+                    return None
                 
                 # Check for errors
                 if result.returncode != 0:
-                    logger.error(f"whisper.cpp failed with return code {result.returncode}: {result.stderr}")
+                    logger.error(f"whisper.cpp failed with return code {result.returncode}")
+                    logger.error(f"Error details: {result.stderr}")
                     logger.debug(f"Command output: {result.stdout}")
                     return None
                 
