@@ -135,6 +135,28 @@ def create_ai_optimize_tab():
                             interactive=True
                         )
                 
+                # Add prompt options
+                with gr.Row(visible=True) as prompt_options:
+                    with gr.Column(scale=1):
+                        use_prompt = gr.Radio(
+                            label="Prompt Settings",
+                            choices=["Don't use prompt", "Use Prompt"],
+                            value="Don't use prompt",
+                            type="value",
+                            interactive=True
+                        )
+                    
+                    with gr.Column(scale=1):
+                        prompt_length = gr.Number(
+                            label="Prompt Length (characters)",
+                            value=200,
+                            minimum=0,
+                            maximum=1000,
+                            step=50,
+                            interactive=True,
+                            visible=False
+                        )
+                
                 # Results display with tabs
                 with gr.Row():
                     with gr.Tabs() as result_tabs:
@@ -505,7 +527,7 @@ def create_ai_optimize_tab():
                 return error_msg, "❌ Error during audio optimization"
         
         # Function to transcribe chunks
-        def transcribe_chunks(selected_language=None, latest_run_dir=None):
+        def transcribe_chunks(selected_language=None, use_prompt_value=None, prompt_chars=None, latest_run_dir=None):
             global transcription_service, is_transcribing, transcription_thread, stop_transcription
             
             # Check if we're already transcribing
@@ -524,6 +546,19 @@ def create_ai_optimize_tab():
                 
             # Log the selected language with extra visibility
             logger.info(f"SELECTED LANGUAGE FOR TRANSCRIPTION: {selected_language} (from direct input)")
+            
+            # Get prompt settings if not provided
+            if use_prompt_value is None:
+                use_prompt_value = use_prompt.value
+            
+            if prompt_chars is None and use_prompt_value == "Use Prompt":
+                prompt_chars = prompt_length.value
+            
+            # Log prompt settings
+            if use_prompt_value == "Use Prompt":
+                logger.info(f"Using prompt with {prompt_chars} characters from previous chunk")
+            else:
+                logger.info("Not using prompts for transcription")
             
             # Find the latest run directory if not provided
             if not latest_run_dir:
@@ -555,21 +590,25 @@ def create_ai_optimize_tab():
             is_transcribing = True
             transcription_thread = threading.Thread(
                 target=transcribe_chunks_thread,
-                args=(latest_run_dir, selected_language)
+                args=(latest_run_dir, selected_language, use_prompt_value, prompt_chars)
             )
             transcription_thread.daemon = True
             transcription_thread.start()
             
-            # Include selected language in the status message
-            status_message = f"🔄 Transcription in progress (Language: {selected_language})"
-            return f"Transcription started with language: {selected_language}. This may take some time...", status_message
+            # Include selected language and prompt info in the status message
+            prompt_info = f", With {prompt_chars} character prompts" if use_prompt_value == "Use Prompt" else ""
+            status_message = f"🔄 Transcription in progress (Language: {selected_language}{prompt_info})"
+            return f"Transcription started with language: {selected_language}{prompt_info}. This may take some time...", status_message
         
-        def transcribe_chunks_thread(run_dir, language_name):
+        def transcribe_chunks_thread(run_dir, language_name, use_prompt_value="Don't use prompt", prompt_chars=0):
             global is_transcribing, stop_transcription
             
             try:
                 # Reset stop flag at the beginning of a new transcription
                 stop_transcription = False
+                
+                # Create a dictionary to track skip reasons
+                skip_reasons = {}
                 
                 # Map language name to code
                 language_map = {
@@ -598,6 +637,13 @@ def create_ai_optimize_tab():
                 # Log selected language with emphasis and highlighting
                 logger.info(f"*** TRANSCRIBING WITH LANGUAGE: {language_name} (CODE: {language_code}) ***")
                 logger.debug(f"*** LANGUAGE SELECTION: Using language {language_name} with code {language_code} for transcription ***")
+                
+                # Log prompt settings
+                using_prompts = use_prompt_value == "Use Prompt" and prompt_chars > 0
+                if using_prompts:
+                    logger.info(f"*** PROMPT SETTINGS: Using {prompt_chars} characters from previous chunk as prompt ***")
+                else:
+                    logger.info("*** PROMPT SETTINGS: Not using prompts for transcription ***")
                 
                 # Create a directory for transcriptions and initialize progress file
                 transcription_dir = os.path.join(run_dir, "transcriptions")
@@ -631,6 +677,10 @@ def create_ai_optimize_tab():
                 progress_path = os.path.join(transcription_dir, "transcription_progress.txt")
                 with open(progress_path, 'w', encoding='utf-8') as f:
                     f.write(f"Starting transcription with language: {language_name} (code: {language_code})\n")
+                    if using_prompts:
+                        f.write(f"Using prompts: Yes, {prompt_chars} characters from previous chunk\n")
+                    else:
+                        f.write("Using prompts: No\n")
                     f.write(f"Total combinations to process: {total_combinations}\n")
                     f.write(f"Total audio chunks to process: {total_chunks}\n\n")
                 
@@ -682,6 +732,9 @@ def create_ai_optimize_tab():
                     # Track the last successful activity time to detect stalls
                     last_activity_time = time.time()
                     
+                    # Track previous chunk's transcription for prompts
+                    previous_transcription = ""
+                    
                     for file_info in sorted_files:
                         # Check if stop was requested
                         if stop_transcription:
@@ -712,12 +765,31 @@ def create_ai_optimize_tab():
                         
                         # Skip if file doesn't exist
                         if not os.path.exists(file_path):
-                            error_msg = f"Audio file not found: {file_path}"
+                            skip_reason = "file_not_found"
+                            skip_reason_desc = "Audio file not found"
+                            error_msg = f"{skip_reason_desc}: {file_path}"
                             logger.warning(error_msg)
                             skipped_chunks += 1
                             combo_skipped += 1
+                            
+                            # Track skip reason
+                            if skip_reason not in skip_reasons:
+                                skip_reasons[skip_reason] = {
+                                    "description": skip_reason_desc,
+                                    "count": 0,
+                                    "chunks": []
+                                }
+                            skip_reasons[skip_reason]["count"] += 1
+                            skip_reasons[skip_reason]["chunks"].append({
+                                "chunk_number": file_info["chunk_number"],
+                                "filename": filename,
+                                "combination": f"chunk{chunk_length}s_overlap{overlap_length}s"
+                            })
+                            
                             with open(progress_path, 'a', encoding='utf-8') as f:
                                 f.write(f"    ❌ SKIPPED: {error_msg}\n")
+                                f.write(f"    ℹ️ INFO: This could be due to the file being deleted or never properly created.\n")
+                                f.write(f"    🔍 EXPLANATION: Check if the optimization process completed correctly for this combination.\n")
                             continue
                         
                         # Load audio
@@ -726,30 +798,87 @@ def create_ai_optimize_tab():
                             
                             # Check if audio is valid (not empty or too short)
                             if len(audio) < 100:  # Less than 100ms is probably invalid
-                                error_msg = f"Audio file too short: {file_path} ({len(audio)}ms)"
+                                skip_reason = "audio_too_short"
+                                skip_reason_desc = "Audio file too short"
+                                error_msg = f"{skip_reason_desc}: {file_path} ({len(audio)}ms)"
                                 logger.warning(error_msg)
                                 skipped_chunks += 1
                                 combo_skipped += 1
+                                
+                                # Track skip reason with additional details
+                                if skip_reason not in skip_reasons:
+                                    skip_reasons[skip_reason] = {
+                                        "description": skip_reason_desc,
+                                        "count": 0,
+                                        "chunks": []
+                                    }
+                                skip_reasons[skip_reason]["count"] += 1
+                                skip_reasons[skip_reason]["chunks"].append({
+                                    "chunk_number": file_info["chunk_number"],
+                                    "filename": filename,
+                                    "duration_ms": len(audio),
+                                    "base_start_time": file_info.get("base_start_time", "N/A"),
+                                    "base_end_time": file_info.get("base_end_time", "N/A"),
+                                    "combination": f"chunk{chunk_length}s_overlap{overlap_length}s"
+                                })
+                                
                                 with open(progress_path, 'a', encoding='utf-8') as f:
                                     f.write(f"    ❌ SKIPPED: {error_msg}\n")
+                                    f.write(f"    ℹ️ INFO: This is likely an empty or corrupted audio file.\n")
+                                    if file_info["chunk_number"] == len(sorted_files) - 1:
+                                        f.write(f"    🔍 EXPLANATION: This is the last chunk in this combination (chunk #{file_info['chunk_number']}), which is often very short or empty when the audio doesn't divide evenly into {chunk_length}s chunks.\n")
+                                    else:
+                                        f.write(f"    🔍 EXPLANATION: The audio at this position may be silent or corrupted. Check the original audio file at around {file_info.get('base_start_time', 'N/A')}s.\n")
                                 continue
+                            
+                            # Prepare prompt if enabled and not the first chunk
+                            initial_prompt = None
+                            if using_prompts and previous_transcription and file_info['chunk_number'] > 0:
+                                # Get the last N characters, but make sure not to cut words
+                                if len(previous_transcription) <= prompt_chars:
+                                    initial_prompt = previous_transcription
+                                else:
+                                    # Start from the last prompt_chars characters
+                                    prompt_text = previous_transcription[-prompt_chars:]
+                                    # Find the first space to avoid cutting words
+                                    first_space = prompt_text.find(' ')
+                                    if first_space > 0:
+                                        # If there's a space, start from there
+                                        initial_prompt = prompt_text[first_space+1:]
+                                    else:
+                                        # If no space, just use the whole segment
+                                        initial_prompt = prompt_text
                                 
+                                if initial_prompt:
+                                    logger.info(f"Using prompt for chunk {file_info['chunk_number']}: '{initial_prompt[:50]}...' ({len(initial_prompt)} chars)")
+                                    with open(progress_path, 'a', encoding='utf-8') as f:
+                                        f.write(f"    Using prompt: [{len(initial_prompt)} chars] {initial_prompt[:50]}...\n")
+                            
                             # Transcribe with error handling
                             try:
-                                transcription = transcription_service.transcribe_chunk(audio, lang_code=language_code)
+                                transcription = transcription_service.transcribe_chunk(audio, lang_code=language_code, initial_prompt=initial_prompt)
                                 
                                 # Update last activity time since we successfully processed this chunk
                                 last_activity_time = time.time()
                                 
                                 if transcription:
+                                    # Save current transcription for next chunk's prompt
+                                    previous_transcription = transcription
+                                    
                                     # Calculate elapsed time for this chunk
                                     chunk_elapsed_time = time.time() - chunk_start_time
+                                    
+                                    # Prepare transcription text with prompt information if used
+                                    full_transcription = transcription
+                                    if initial_prompt:
+                                        full_transcription = f"[PROMPT] {initial_prompt}\n\n{transcription}"
                                     
                                     # Save individual transcription to file
                                     txt_filename = os.path.splitext(filename)[0] + ".txt"
                                     txt_path = os.path.join(combo_transcription_dir, txt_filename)
                                     
                                     with open(txt_path, 'w', encoding='utf-8') as f:
+                                        # Only save the raw transcription text, without any prompt info
                                         f.write(transcription)
                                     
                                     # Add to concatenated transcriptions
@@ -757,7 +886,10 @@ def create_ai_optimize_tab():
                                         'chunk_number': file_info['chunk_number'],
                                         'start_time': file_info['base_start_time'],
                                         'end_time': file_info['base_end_time'],
-                                        'text': transcription
+                                        'text': transcription,
+                                        'prompt_used': bool(initial_prompt),
+                                        'prompt_text': initial_prompt if initial_prompt else None,
+                                        'prompt_length': len(initial_prompt) if initial_prompt else 0
                                     })
                                     
                                     # Add to results
@@ -770,12 +902,15 @@ def create_ai_optimize_tab():
                                         'actual_start_time': file_info['actual_start_time'],
                                         'actual_end_time': file_info['actual_end_time'],
                                         'transcription': transcription,
+                                        'prompt_used': bool(initial_prompt),
+                                        'prompt_text': initial_prompt if initial_prompt else None,
                                         'elapsed_time': chunk_elapsed_time
                                     })
                                     
                                     # Log success
-                                    success_msg = f"    ✅ SUCCESS: Transcribed in {chunk_elapsed_time:.2f}s"
-                                    logger.info(f"Successfully transcribed chunk {processed_files}/{total_files} in {chunk_elapsed_time:.2f}s")
+                                    prompt_info = f" (with prompt)" if initial_prompt else ""
+                                    success_msg = f"    ✅ SUCCESS{prompt_info}: Transcribed in {chunk_elapsed_time:.2f}s"
+                                    logger.info(f"Successfully transcribed chunk {processed_files}/{total_files} in {chunk_elapsed_time:.2f}s{prompt_info}")
                                     with open(progress_path, 'a', encoding='utf-8') as f:
                                         f.write(f"{success_msg}\n")
                                     
@@ -826,7 +961,23 @@ def create_ai_optimize_tab():
                         # Save as plain text file
                         with open(concatenated_file_path, 'w', encoding='utf-8') as f:
                             for item in all_transcriptions:
-                                time_str = f"[{item['start_time']:.2f}s - {item['end_time']:.2f}s]"
+                                # Convert seconds to HH:MM:SS format
+                                start_hours, start_remainder = divmod(item['start_time'], 3600)
+                                start_minutes, start_seconds = divmod(start_remainder, 60)
+                                start_time_str = f"{int(start_hours):02d}:{int(start_minutes):02d}:{int(start_seconds):02d}"
+                                
+                                end_hours, end_remainder = divmod(item['end_time'], 3600)
+                                end_minutes, end_seconds = divmod(end_remainder, 60)
+                                end_time_str = f"{int(end_hours):02d}:{int(end_minutes):02d}:{int(end_seconds):02d}"
+                                
+                                time_str = f"[{start_time_str} - {end_time_str}]"
+                                
+                                # First write prompt if used (before timecode)
+                                if item.get('prompt_used') and item.get('prompt_text'):
+                                    # Preserve line breaks in the prompt text
+                                    f.write(f"[PROMPT] {item['prompt_text']}\n")
+                                
+                                # Then write timecode followed by transcription text
                                 f.write(f"{time_str} {item['text']}\n\n")
                         
                         # Save as JSON for more structured data
@@ -845,7 +996,9 @@ def create_ai_optimize_tab():
                             'successful': combo_successful,
                             'failed': combo_failed,
                             'skipped': combo_skipped,
-                            'elapsed_time': combo_elapsed_time
+                            'elapsed_time': combo_elapsed_time,
+                            'using_prompts': using_prompts,
+                            'prompt_length': prompt_chars if using_prompts else 0
                         })
                         
                         # Update progress with concatenated file info
@@ -865,6 +1018,8 @@ def create_ai_optimize_tab():
                     'original_metadata': metadata_path,
                     'language': language_name,
                     'language_code': language_code,
+                    'using_prompts': using_prompts,
+                    'prompt_length': prompt_chars if using_prompts else 0,
                     'timestamp': datetime.now().strftime("%Y%m%d_%H%M%S"),
                     'combinations': results,
                     'statistics': {
@@ -873,7 +1028,8 @@ def create_ai_optimize_tab():
                         'failed': failed_chunks,
                         'skipped': skipped_chunks,
                         'elapsed_time': total_elapsed_time
-                    }
+                    },
+                    'skip_reasons': skip_reasons
                 }
                 
                 transcription_metadata_path = os.path.join(transcription_dir, "transcription_metadata.json")
@@ -887,9 +1043,9 @@ def create_ai_optimize_tab():
                 with open(progress_path, 'a', encoding='utf-8') as f:
                     f.write("\n==============================================\n")
                     if stop_transcription:
-                        f.write("TRANSCRIPTION STOPPED BY USER\n")
+                        f.write("⛔️ TRANSCRIPTION STOPPED BY USER ⛔️\n")
                     else:
-                        f.write("TRANSCRIPTION COMPLETE\n")
+                        f.write("✅✅✅ TRANSCRIPTION COMPLETE ✅✅✅\n")
                     f.write(f"Total elapsed time: {total_elapsed_time:.2f} seconds\n")
                     f.write(f"Total chunks: {total_chunks}\n")
                     f.write(f"  ✅ Successful: {successful_chunks}\n")
@@ -903,6 +1059,102 @@ def create_ai_optimize_tab():
                 summary_path = os.path.join(transcription_dir, "transcription_summary.txt")
                 with open(summary_path, 'w', encoding='utf-8') as f:
                     f.write(summary)
+                
+                # Create a skipped chunks report if any were skipped
+                if skipped_chunks > 0 and 'skip_reasons' in transcription_metadata:
+                    skipped_report_path = os.path.join(transcription_dir, "skipped_chunks_report.txt")
+                    with open(skipped_report_path, 'w', encoding='utf-8') as f:
+                        f.write("===== SKIPPED CHUNKS DETAILED REPORT =====\n\n")
+                        f.write(f"Total skipped chunks: {skipped_chunks} out of {total_chunks} ({skipped_chunks/total_chunks*100:.1f}%)\n\n")
+                        
+                        # Group by reason
+                        f.write("=== SKIPPED CHUNKS BY REASON ===\n")
+                        for reason_key, reason_data in transcription_metadata['skip_reasons'].items():
+                            f.write(f"\n• {reason_data['description']} - {reason_data['count']} chunks\n")
+                            
+                            # List chunks with this reason
+                            for chunk in reason_data['chunks']:
+                                combo = chunk['combination']
+                                chunk_num = chunk['chunk_number']
+                                filename = chunk['filename']
+                                
+                                chunk_info = f"  - Chunk #{chunk_num} in {combo}: {filename}"
+                                
+                                # Add duration info if available
+                                if 'duration_ms' in chunk:
+                                    chunk_info += f" (duration: {chunk['duration_ms']}ms)"
+                                
+                                # Add time info if available
+                                if 'base_start_time' in chunk and 'base_end_time' in chunk:
+                                    if chunk['base_start_time'] != "N/A" and chunk['base_end_time'] != "N/A":
+                                        chunk_info += f" - audio region {chunk['base_start_time']:.2f}s-{chunk['base_end_time']:.2f}s"
+                                
+                                f.write(f"{chunk_info}\n")
+                            
+                        # Group by combination
+                        f.write("\n\n=== SKIPPED CHUNKS BY COMBINATION ===\n")
+                        combo_skips = {}
+                        
+                        # Collect chunks by combination
+                        for reason_data in transcription_metadata['skip_reasons'].values():
+                            for chunk in reason_data['chunks']:
+                                combo = chunk['combination']
+                                if combo not in combo_skips:
+                                    combo_skips[combo] = []
+                                    
+                                combo_skips[combo].append({
+                                    'chunk_number': chunk['chunk_number'],
+                                    'reason': reason_data['description'],
+                                    'filename': chunk['filename']
+                                })
+                        
+                        # Output chunks by combination
+                        for combo, chunks in sorted(combo_skips.items()):
+                            f.write(f"\n• {combo} - {len(chunks)} skipped chunks\n")
+                            
+                            # Sort by chunk number
+                            for chunk in sorted(chunks, key=lambda x: x['chunk_number']):
+                                f.write(f"  - Chunk #{chunk['chunk_number']}: {chunk['reason']} - {chunk['filename']}\n")
+                        
+                        # Identify patterns
+                        f.write("\n\n=== SKIP PATTERNS DETECTED ===\n")
+                        
+                        # Check for skips at the end of combinations (common pattern)
+                        last_chunk_skips = 0
+                        total_combos = len(metadata['combinations'])
+                        combos_with_last_chunk_skipped = set()
+                        
+                        for combo in metadata['combinations']:
+                            combo_name = f"chunk{combo['chunk_length']}s_overlap{combo['overlap_length']}s"
+                            if combo_name in combo_skips:
+                                combo_file_count = len([f for f in combo['files'] if isinstance(f, dict) and 'chunk_number' in f])
+                                
+                                for skip in combo_skips[combo_name]:
+                                    if skip['chunk_number'] == combo_file_count - 1:
+                                        last_chunk_skips += 1
+                                        combos_with_last_chunk_skipped.add(combo_name)
+                        
+                        if last_chunk_skips > 0:
+                            f.write(f"• Last-chunk skips: {last_chunk_skips} out of {len(combos_with_last_chunk_skipped)} combinations have the last chunk skipped\n")
+                            f.write("  This is normal behavior when the audio doesn't divide evenly into the chosen chunk size.\n")
+                            f.write("  The last chunk is often very short or empty, which causes it to be skipped.\n")
+                            f.write("  ℹ️ Solution: This is expected behavior and doesn't require any action.\n")
+                        
+                        # Check for chunks with very short duration
+                        very_short_chunks = []
+                        for reason_data in transcription_metadata['skip_reasons'].values():
+                            if reason_data['description'] == "Audio file too short":
+                                for chunk in reason_data['chunks']:
+                                    if 'duration_ms' in chunk and chunk['duration_ms'] < 50:
+                                        very_short_chunks.append(chunk)
+                        
+                        if very_short_chunks:
+                            f.write(f"\n• Very short chunks: {len(very_short_chunks)} chunks are extremely short (less than 50ms)\n")
+                            f.write("  This is typically caused by one of the following:\n")
+                            f.write("  1. The audio doesn't divide evenly into the chunk size\n")
+                            f.write("  2. The original audio has silent portions\n")
+                            f.write("  3. The chunk algorithm created some zero-length chunks\n")
+                            f.write("  ℹ️ Solution: Try different chunk sizes or check the original audio for silent sections.\n")
                 
                 logger.info(f"Transcription complete. Processed {total_chunks} chunks with {successful_chunks} successful ({successful_chunks/total_chunks*100:.1f}% success rate)")
                 
@@ -924,6 +1176,12 @@ def create_ai_optimize_tab():
             summary += f"Language: {metadata['language']} ({metadata['language_code']})\n"
             summary += f"Timestamp: {metadata['timestamp']}\n"
             summary += f"Directory: {os.path.basename(run_dir)}\n"
+            
+            # Add prompt information
+            if metadata.get('using_prompts', False):
+                summary += f"Using prompts: Yes, {metadata.get('prompt_length', 0)} characters from previous chunk\n"
+            else:
+                summary += "Using prompts: No\n"
             
             # Check if transcription was stopped
             was_stopped = stop_transcription
@@ -948,12 +1206,59 @@ def create_ai_optimize_tab():
                 summary += f"  ❌ Failed to transcribe: {failed} ({failed/total_chunks*100:.1f}%)\n"
                 summary += f"  ⚠️ Skipped chunks: {skipped} ({skipped/total_chunks*100:.1f}%)\n"
                 
+                # Add more detailed information about skipped chunks in a prominent section
+                if skipped > 0:
+                    # Always add a header for skipped chunks section
+                    summary += f"\n==== SKIPPED CHUNKS INFORMATION ====\n"
+                    
+                    if 'skip_reasons' in metadata:
+                        skip_reasons = metadata['skip_reasons']
+                        
+                        # Add breakdown by reason
+                        summary += f"Skipped chunks by reason:\n"
+                        for reason, data in skip_reasons.items():
+                            percentage = data['count']/skipped*100
+                            summary += f"• {data['description']}: {data['count']} chunks ({percentage:.1f}%)\n"
+                        
+                        # Check for last chunk skips (common pattern)
+                        last_chunk_skips = 0
+                        combos_with_last_chunk_skipped = set()
+                        
+                        for combo in metadata['combinations']:
+                            combo_pattern = f"chunk{combo['chunk_length']}s_overlap{combo['overlap_length']}s"
+                            combo_file_count = len([f for f in combo['files'] if isinstance(f, dict) and 'chunk_number' in f])
+                            
+                            # Look through all skip reasons for this combo
+                            for reason_data in skip_reasons.values():
+                                for chunk in reason_data['chunks']:
+                                    if chunk.get('combination') == combo_pattern and chunk['chunk_number'] == combo_file_count - 1:
+                                        last_chunk_skips += 1
+                                        combos_with_last_chunk_skipped.add(combo_pattern)
+                        
+                        # If we detected last chunk skips, highlight this common pattern
+                        if last_chunk_skips > 0:
+                            summary += f"\n⚠️ Common Pattern Detected: {last_chunk_skips} combinations have their last chunk skipped\n"
+                            summary += f"  This is normal behavior when the audio doesn't divide evenly into chunks.\n"
+                            summary += f"  The last chunk in each combination is often very short or empty.\n"
+                            
+                        # Add info about skipped chunks report
+                        summary += f"\nA detailed report of all skipped chunks has been generated at:\n"
+                        summary += f"- {os.path.join(run_dir, 'transcriptions', 'skipped_chunks_report.txt')}\n"
+                    else:
+                        # Generic message if we don't have detailed skip reasons
+                        summary += f"\nSome chunks were skipped, most likely because they were empty or too short.\n"
+                        summary += f"This commonly happens with the last chunk in a combination when the audio doesn't divide evenly.\n"
+                    
+                    # Add a horizontal line to separate this section
+                    summary += f"\n" + "-" * 50 + "\n"
+                
                 if successful > 0:
                     avg_time_per_chunk = elapsed_time / successful
                     summary += f"- Average time per chunk: {avg_time_per_chunk:.2f} seconds\n"
             else:
                 # Count total files (for backward compatibility)
                 total_files = sum(len(combo['files']) for combo in metadata['combinations'])
+                
                 summary += f"Transcribed {total_files} audio chunks across {len(metadata['combinations'])} combinations\n"
             
             summary += f"Created {len(metadata['combinations'])} combined transcription files, one for each combination\n\n"
@@ -971,6 +1276,33 @@ def create_ai_optimize_tab():
                     total_combo_chunks = combo['successful'] + combo['failed'] + combo['skipped']
                     summary += f"Files: {total_combo_chunks} chunks (✅ {combo['successful']} successful, "
                     summary += f"❌ {combo['failed']} failed, ⚠️ {combo['skipped']} skipped)\n"
+                    
+                    # Add detailed note about skipped files in this combo
+                    if combo['skipped'] > 0:
+                        summary += f"Note: {combo['skipped']} chunk(s) skipped in this combination.\n"
+                        
+                        # Try to find which chunks were skipped in this combination
+                        if 'skip_reasons' in metadata:
+                            combo_pattern = f"chunk{chunk_length}s_overlap{overlap_length}s"
+                            skipped_in_combo = []
+                            
+                            for reason, data in metadata['skip_reasons'].items():
+                                for chunk in data['chunks']:
+                                    if chunk.get('combination') == combo_pattern:
+                                        skipped_in_combo.append({
+                                            'chunk_number': chunk['chunk_number'],
+                                            'reason': data['description']
+                                        })
+                            
+                            if skipped_in_combo:
+                                summary += "  Skipped chunks in this combination:\n"
+                                for skip_info in sorted(skipped_in_combo, key=lambda x: x['chunk_number']):
+                                    summary += f"    - Chunk #{skip_info['chunk_number']}: {skip_info['reason']}\n"
+                                    
+                                # If last chunk was skipped, add explanation
+                                last_chunks = [s for s in skipped_in_combo if s['chunk_number'] == total_combo_chunks - 1]
+                                if last_chunks:
+                                    summary += f"  Note: The last chunk was skipped, likely because the audio doesn't divide evenly into {chunk_length}s chunks.\n"
                     
                     if 'elapsed_time' in combo:
                         summary += f"Processing time: {combo['elapsed_time']:.2f} seconds\n"
@@ -1006,7 +1338,17 @@ def create_ai_optimize_tab():
             # Add troubleshooting info
             if failed > 0 or skipped > 0:
                 summary += f"\nTroubleshooting Info:\n"
-                summary += f"- If some chunks failed to transcribe, check the transcription_progress.txt file for detailed error messages\n"
+                if skipped > 0:
+                    summary += f"- Skipped chunks are usually due to empty or very short audio files (less than 100ms)\n"
+                    summary += f"- This is normal for the last chunk in a combination if the audio doesn't divide evenly\n"
+                    
+                    # Add common solutions for skipped chunks
+                    summary += f"- Common solutions for excessive skipped chunks:\n"
+                    summary += f"  1. Try different chunk lengths that divide more evenly into your audio length\n"
+                    summary += f"  2. Check the original audio file for silent sections or corrupted segments\n"
+                    summary += f"  3. For last-chunk skips (most common), this is normal and can be ignored\n"
+                    
+                summary += f"- Check the transcription_progress.txt file for detailed error messages and info about skipped chunks\n"
                 summary += f"- Progress file: {os.path.join(run_dir, 'transcriptions', 'transcription_progress.txt')}\n"
                 summary += f"- See application logs for additional details on failures\n"
             
@@ -1036,6 +1378,50 @@ def create_ai_optimize_tab():
             if os.path.exists(summary_path):
                 with open(summary_path, 'r', encoding='utf-8') as f:
                     summary = f.read()
+                
+                # Add a clear completion message at the top if it's not already there
+                if "✅ TRANSCRIPTION COMPLETED SUCCESSFULLY ✅" not in summary:
+                    # Check if we have statistics to determine if it was a successful completion
+                    if "Transcription Statistics:" in summary and not is_transcribing:
+                        summary = "✅ TRANSCRIPTION COMPLETED SUCCESSFULLY ✅\n\n" + summary
+                
+                # Check if there's a skipped chunks report
+                skipped_report_path = os.path.join(latest_run_dir, "transcriptions", "skipped_chunks_report.txt")
+                if os.path.exists(skipped_report_path) and "Skipped chunks:" in summary:
+                    # Extract skipped count from summary
+                    try:
+                        skipped_count = 0
+                        for line in summary.split('\n'):
+                            if "⚠️ Skipped chunks:" in line:
+                                parts = line.split(':')
+                                if len(parts) > 1:
+                                    parts = parts[1].strip().split(' ')
+                                    if len(parts) > 0:
+                                        skipped_count = int(parts[0])
+                                break
+                        
+                        if skipped_count > 0:
+                            # Add a notice about the skipped chunks report
+                            # Only add this if it doesn't already exist
+                            if "DETAILED SKIPPED CHUNKS REPORT AVAILABLE" not in summary:
+                                report_notice = f"\n⚠️ DETAILED SKIPPED CHUNKS REPORT AVAILABLE ⚠️\n"
+                                report_notice += f"{skipped_count} chunks were skipped during transcription.\n"
+                                report_notice += f"See: {os.path.basename(skipped_report_path)} for complete details about each skipped chunk.\n\n"
+                                
+                                # Insert after the statistics section
+                                if "Transcription Statistics:" in summary:
+                                    parts = summary.split("Transcription Statistics:")
+                                    if len(parts) > 1:
+                                        stats_section_end = parts[1].find("\nCreated ")
+                                        if stats_section_end > 0:
+                                            summary = parts[0] + "Transcription Statistics:" + parts[1][:stats_section_end] + report_notice + parts[1][stats_section_end:]
+                                        else:
+                                            summary += report_notice
+                                    else:
+                                        summary += report_notice
+                    except Exception as e:
+                        logger.error(f"Error adding skipped chunks report notice: {str(e)}")
+                
                 return summary
             
             # If no summary, check for progress file
@@ -1043,11 +1429,20 @@ def create_ai_optimize_tab():
             if os.path.exists(progress_path):
                 with open(progress_path, 'r', encoding='utf-8') as f:
                     progress = f.read()
+                    
+                # Check if transcription is complete based on the content
+                if "TRANSCRIPTION COMPLETE" in progress and not is_transcribing:
+                    progress = "✅ TRANSCRIPTION COMPLETED SUCCESSFULLY ✅\n\n" + progress
+                elif "TRANSCRIPTION STOPPED BY USER" in progress and not is_transcribing:
+                    progress = "⛔️ TRANSCRIPTION WAS STOPPED BY USER ⛔️\n\n" + progress
+                elif is_transcribing:
+                    progress = "🔄 TRANSCRIPTION IN PROGRESS 🔄\n\n" + progress
+                
                 return progress
             
             # If we're still transcribing but no files exist yet
             if is_transcribing:
-                return "Initializing transcription process..."
+                return "🔄 TRANSCRIPTION IN PROGRESS - Initializing transcription process... 🔄"
             
             return None
         
@@ -1070,7 +1465,7 @@ def create_ai_optimize_tab():
         # Connect transcribe button
         transcribe_btn.click(
             fn=transcribe_chunks,
-            inputs=[language],
+            inputs=[language, use_prompt, prompt_length],
             outputs=[transcription_text, status_display]
         )
         
@@ -1127,6 +1522,13 @@ def create_ai_optimize_tab():
             fn=stop_transcription_process,
             inputs=[],
             outputs=[status_display]
+        )
+        
+        # Connect use_prompt to show/hide prompt_length
+        use_prompt.change(
+            fn=lambda x: gr.update(visible=(x == "Use Prompt")),
+            inputs=[use_prompt],
+            outputs=[prompt_length]
         )
     
     return ai_optimize_tab 

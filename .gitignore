@@ -101,3 +101,8 @@ whisper.cpp/models/*.pt
 
 # Optimization run directories
 run_*/
+logs/audio_dataset.log
+
+# Ignore all files in the logs folder
+logs/*
+
