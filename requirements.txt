@@ -1,7 +1,15 @@
-yt-dlp>=2023.12.30
+# Core dependencies
+gradio==5.17.0
+pydub==0.25.1
+pydantic==2.5.2
+typing-extensions>=4.6.1
+ollama==0.3.1  # Ollama Python client for API access
+
+# Audio processing
+numpy>=1.24.0
+ffmpeg-python>=0.2.0
+
+# Utils
 requests>=2.31.0
-datetime>=5.4
-python-dateutil>=2.8.2
 tqdm>=4.66.1
-colorama>=0.4.6
-gradio>=5.17.0
+python-dateutil>=2.8.2

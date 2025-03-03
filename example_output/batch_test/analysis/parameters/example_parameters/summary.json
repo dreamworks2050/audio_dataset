@@ -1,0 +1,20 @@
+{
+  "parameter_set": "example_parameters",
+  "total_files": 3,
+  "successful_analyses": 3,
+  "failed_analyses": 0,
+  "retried_files": 0,
+  "skipped_files": 0,
+  "overall_average_score": 6.54,
+  "detailed_metrics": {
+    "overall_accuracy": 7.67,
+    "joint_smoothness": 4.67,
+    "contextual_continuity": 4.33,
+    "grammar_integrity": 8.0,
+    "word_completeness": 10.0,
+    "redundancy": 5.67,
+    "content_loss": 6.67,
+    "joint_readability": 5.33
+  },
+  "timestamp": "2025-02-28 19:07:54"
+}

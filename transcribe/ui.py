@@ -578,6 +578,10 @@ def update_transcription_display(show_prompts_enabled=False):
     """
     global is_transcribing, chunk_prompts
     
+    # Handle case when called from Gradio without arguments
+    if show_prompts_enabled is None:
+        show_prompts_enabled = False
+    
     # Only log when actually updating
     if is_transcribing:
         logger.debug(f"Updating transcription display (show_prompts={show_prompts_enabled})")

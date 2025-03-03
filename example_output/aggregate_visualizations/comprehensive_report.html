@@ -1,0 +1,103 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Comprehensive Transcription Analysis Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1, h2, h3 { color: #333; }
+                .container { max-width: 1200px; margin: 0 auto; }
+                table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                .chart-container { margin: 20px 0; text-align: center; }
+                .chart-container img { max-width: 100%; height: auto; }
+                .summary-card { 
+                    border: 1px solid #ddd; 
+                    border-radius: 5px; 
+                    padding: 15px; 
+                    margin-bottom: 20px;
+                    background-color: #f9f9f9;
+                }
+                .score-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+                .score-box {
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    padding: 10px;
+                    min-width: 120px;
+                    text-align: center;
+                }
+                .score-high { background-color: #d4edda; }
+                .score-medium { background-color: #fff3cd; }
+                .score-low { background-color: #f8d7da; }
+                .batch-section {
+                    margin-top: 30px;
+                    padding-top: 20px;
+                    border-top: 2px solid #eee;
+                }
+                .parameter-section {
+                    margin-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Comprehensive Transcription Analysis Report</h1>
+                <p>Generated on: 2025-02-28 17:12:54</p>
+                
+                <h2>Aggregate Visualizations</h2>
+                
+                <h3>Batch Comparison</h3>
+                <div class="chart-container">
+                    <img src="batch_comparison.png" alt="Batch Comparison">
+                </div>
+                
+                <h3>Parameter Set Comparison</h3>
+                <div class="chart-container">
+                    <img src="parameter_comparison.png" alt="Parameter Set Comparison">
+                </div>
+                
+                <h3>Parameter Set Performance by Batch</h3>
+                <div class="chart-container">
+                    <img src="batch_parameter_comparison.png" alt="Batch & Parameter Comparison">
+                </div>
+                
+                <h3>Metrics Comparison</h3>
+                <div class="chart-container">
+                    <img src="metrics_comparison.png" alt="Metrics Comparison">
+                </div>
+                
+                <h3>Metrics by Batch</h3>
+                <div class="chart-container">
+                    <img src="batch_metrics_heatmap.png" alt="Batch Metrics Heatmap">
+                </div>
+                
+                <h3>Metrics by Parameter Set</h3>
+                <div class="chart-container">
+                    <img src="parameter_metrics_heatmap.png" alt="Parameter Metrics Heatmap">
+                </div>
+        <h2>Summary by Batch</h2><table border="1" class="dataframe dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>batch</th>
+      <th>file_count</th>
+      <th>average_score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>batch_test</td>
+      <td>3.0</td>
+      <td>6.873333</td>
+    </tr>
+  </tbody>
+</table><h2>Detailed Results by Batch and Parameter</h2><div class="batch-section"><h3>Batch: batch</h3><div class="parameter-section"><h4>Parameter: test_example_parameters</h4><div class="score-box score-medium"><h4>Average Score</h4><div style="font-size: 24px;">6.9</div></div></div></div>
+            </div>
+        </body>
+        </html>
+        

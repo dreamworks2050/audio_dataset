@@ -15,8 +15,109 @@ A Python-based tool with a user-friendly interface for downloading YouTube video
 - Clean and organized file management
 - Audio transcription capabilities using whisper.cpp
 
-## Project Structure
+## New Feature: AI Analysis
 
+The AI Analysis feature uses Ollama with the "mistral" model to analyze transcription quality. It focuses specifically on the joins between chunks to help identify the best chunking strategy for your transcriptions.
+
+### How It Works
+
+1. The system analyzes each transcription chunk in context with its neighboring chunks
+2. It evaluates 8 key criteria for transcription quality:
+   - Overall Accuracy
+   - Joint Smoothness
+   - Contextual Continuity
+   - Grammar Integrity
+   - Word Completeness
+   - Redundancy 
+   - Content Loss
+   - Joint Readability
+
+3. Each criterion is scored on a scale of 0-10
+4. Detailed analysis is provided for each chunk showing the reasoning process
+5. Summary reports are generated for each combination of chunk/overlap settings
+
+### Setup Requirements
+
+1. Install Ollama: Follow the instructions at [ollama.com](https://ollama.com)
+2. Start the Ollama service (important!):
+   - On macOS/Linux: Run `ollama serve` in a terminal
+   - On Windows: Ensure the Ollama application is running
+3. Pull the models you want to use:
+   - For Mistral: `ollama pull mistral`
+   - For Llama3: `ollama pull llama3`
+   - For other models: `ollama pull model_name`
+4. Install Python dependencies: `pip install -r requirements.txt`
+
+### Using the AI Analysis Feature
+
+1. First prepare audio files using the "Prepare Audios" button
+2. Transcribe the chunks using the "Transcribe Chunks" button
+3. **Make sure Ollama is running** (check with `ps aux | grep ollama`)
+4. Navigate to the "AI Analysis" tab
+5. Select the Ollama model to use from the dropdown menu (options include "mistral", "llama3", "gemma2:9b", etc.)
+6. Click the "Start Analysis" button to begin the analysis process
+7. Monitor progress in the "Analysis Status" section
+8. View detailed results in the "Analysis Results" section
+
+> **Note:** The analysis process requires that each combination has been transcribed first. Combinations that haven't been transcribed will be skipped during analysis. If you see "Skipped combinations" in the analysis summary, make sure to run the transcription process for those combinations before analyzing them.
+
+### Enhanced Features
+
+The AI Analysis system includes several robust features:
+
+1. **Comprehensive Logging**:
+   - Detailed logs for each analysis run
+   - Per-file analysis logs with timestamps
+   - Summary reports with statistics and recommendations
+
+2. **Error Handling**:
+   - Automatic retry for Ollama API failures
+   - Graceful handling of missing files
+   - Recovery from incomplete transcriptions
+   - Detailed error reporting with error types
+
+3. **Detailed Analysis Reports**:
+   - Summary files in both JSON and human-readable formats
+   - Individual chunk analysis with scores and reasoning
+   - Overall statistics and quality metrics
+   - Charts and visualizations of results
+
+4. **Metadata Management**:
+   - Automatic creation of metadata.json if missing
+   - Recovery from combined_transcription.json
+   - Validation of transcription files
+
+## Understanding Analysis Results
+
+Each chunk analysis provides:
+- Score for each criterion (0-10)
+- Step-by-step reasoning
+- Overall average score
+- Specific observations about the joint quality
+- Analysis duration and performance metrics
+
+The system generates several output files:
+- `detailed_analysis.log`: Complete log of the analysis process
+- `summary.json`: Machine-readable summary of all results
+- `summary.txt`: Human-readable summary with recommendations
+- Individual chunk analysis files in both JSON and TXT formats
+
+### Analysis Metrics Explained
+
+- **Overall Accuracy**: How accurately the transcription captures the spoken content
+- **Joint Smoothness**: How well the chunks connect at their boundaries
+- **Contextual Continuity**: Whether the meaning flows naturally across chunk boundaries
+- **Grammar Integrity**: Grammatical correctness at chunk boundaries
+- **Word Completeness**: Whether words are complete at chunk boundaries
+- **Redundancy**: Repeated content across chunk boundaries
+- **Content Loss**: Missing content at chunk boundaries
+- **Joint Readability**: How readable the text is across chunk boundaries
+
+### Recommendations
+
+The system provides automatic recommendations based on analysis results:
+- Suggestions for optimal chunk size and overlap settings
+- Identification of problematic combinations
 ```
 ./
 ├── audio/           # Directory for extracted audio files

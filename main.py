@@ -6,6 +6,7 @@ import os
 from split.split import get_audio_files, split_audio
 from utils.cleanup import cleanup_python_cache
 from utils.logger import logger
+from ai_optimize import get_create_ai_optimize_tab
 
 # Clear logs at startup
 logger.info("Starting application")
@@ -136,8 +137,8 @@ cleanup_python_cache()
 with gr.Blocks() as ui:
     with gr.Tabs():
         # Import and create the AI Optimize tab (at the top)
-        from ai_optimize import create_ai_optimize_tab
-        create_ai_optimize_tab()
+        create_ai_optimize_tab = get_create_ai_optimize_tab()
+        create_ai_optimize_tab()  # Actually call the function
         
         with gr.TabItem("Download"):
             with gr.Row():

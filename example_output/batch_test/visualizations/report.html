@@ -1,0 +1,208 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Transcription Analysis Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1, h2, h3 { color: #333; }
+                .container { max-width: 1200px; margin: 0 auto; }
+                table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                .chart-container { margin: 20px 0; text-align: center; }
+                .chart-container img { max-width: 100%; height: auto; }
+                .metric-good { color: green; }
+                .metric-medium { color: orange; }
+                .metric-poor { color: red; }
+                .summary-card { 
+                    border: 1px solid #ddd; 
+                    border-radius: 5px; 
+                    padding: 15px; 
+                    margin-bottom: 20px;
+                    background-color: #f9f9f9;
+                }
+                .score-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+                .score-box {
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    padding: 10px;
+                    min-width: 120px;
+                    text-align: center;
+                }
+                .score-high { background-color: #d4edda; }
+                .score-medium { background-color: #fff3cd; }
+                .score-low { background-color: #f8d7da; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Transcription Analysis Report</h1>
+                <p>Generated on: 2025-02-28 17:05:04</p>
+                
+                <h2>Summary of Results</h2>
+        <table border="1" class="dataframe dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>combination</th>
+      <th>overall_accuracy</th>
+      <th>joint_smoothness</th>
+      <th>contextual_continuity</th>
+      <th>grammar_integrity</th>
+      <th>word_completeness</th>
+      <th>redundancy</th>
+      <th>content_loss</th>
+      <th>joint_readability</th>
+      <th>average_score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>batch_test</td>
+      <td>7.666667</td>
+      <td>7.0</td>
+      <td>7.333333</td>
+      <td>9.333333</td>
+      <td>8.666667</td>
+      <td>5.666667</td>
+      <td>2.666667</td>
+      <td>6.666667</td>
+      <td>6.873333</td>
+    </tr>
+  </tbody>
+</table><h2>Parameter Set Summaries</h2>
+            <div class="summary-card">
+                <h3>batch_test</h3>
+                <div class="score-container">
+                    <div class="score-box score-medium">
+                        <h4>Average Score</h4>
+                        <div style="font-size: 24px;">6.9</div>
+                    </div>
+                    <div class="score-box">
+                        <h4>Files</h4>
+                        <div>Total: 3</div>
+                        <div>Success: 3</div>
+                        <div>Failed: 0</div>
+                    </div>
+                    <div class="score-box">
+                        <h4>Retries</h4>
+                        <div>0</div>
+                    </div>
+                </div>
+            <h4>Metrics</h4><div class='score-container'>
+                        <div class="score-box score-high">
+                            <div>Overall Accuracy</div>
+                            <div style="font-size: 18px;">7.7</div>
+                        </div>
+                        
+                        <div class="score-box score-high">
+                            <div>Joint Smoothness</div>
+                            <div style="font-size: 18px;">7.0</div>
+                        </div>
+                        
+                        <div class="score-box score-high">
+                            <div>Contextual Continuity</div>
+                            <div style="font-size: 18px;">7.3</div>
+                        </div>
+                        
+                        <div class="score-box score-high">
+                            <div>Grammar Integrity</div>
+                            <div style="font-size: 18px;">9.3</div>
+                        </div>
+                        
+                        <div class="score-box score-high">
+                            <div>Word Completeness</div>
+                            <div style="font-size: 18px;">8.7</div>
+                        </div>
+                        
+                        <div class="score-box score-medium">
+                            <div>Redundancy</div>
+                            <div style="font-size: 18px;">5.7</div>
+                        </div>
+                        
+                        <div class="score-box score-low">
+                            <div>Content Loss</div>
+                            <div style="font-size: 18px;">2.7</div>
+                        </div>
+                        
+                        <div class="score-box score-medium">
+                            <div>Joint Readability</div>
+                            <div style="font-size: 18px;">6.7</div>
+                        </div>
+                        </div></div>
+                <h2>Visualization Charts</h2>
+                
+                <h3>Overall Comparison</h3>
+                <div class="chart-container">
+                    <img src="overall_comparison.png" alt="Overall Comparison">
+                </div>
+                
+                <h3>Detailed Metrics</h3>
+                <div class="chart-container">
+                    <img src="detailed_metrics.png" alt="Detailed Metrics">
+                </div>
+                
+                <h3>Metrics Heatmap</h3>
+                <div class="chart-container">
+                    <img src="metrics_heatmap.png" alt="Metrics Heatmap">
+                </div>
+        
+                <h3>Audio File Comparison</h3>
+                <div class="chart-container">
+                    <img src="audio_file_comparison.png" alt="Audio File Comparison">
+                </div>
+            <h2>Detailed Results by Combination</h2><h3>batch_test</h3><table border="1" class="dataframe dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>chunk_number</th>
+      <th>filename</th>
+      <th>audio_file</th>
+      <th>average_score</th>
+      <th>overall_accuracy</th>
+      <th>joint_smoothness</th>
+      <th>contextual_continuity</th>
+      <th>grammar_integrity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>chunk_0.wav</td>
+      <td>sample_audio_1.wav</td>
+      <td>8.00</td>
+      <td>8</td>
+      <td>9</td>
+      <td>7</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>chunk_1.wav</td>
+      <td>sample_audio_1.wav</td>
+      <td>6.62</td>
+      <td>7</td>
+      <td>6</td>
+      <td>8</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>chunk_2.wav</td>
+      <td>sample_audio_1.wav</td>
+      <td>6.00</td>
+      <td>8</td>
+      <td>6</td>
+      <td>7</td>
+      <td>9</td>
+    </tr>
+  </tbody>
+</table>
+            </div>
+        </body>
+        </html>
+        
