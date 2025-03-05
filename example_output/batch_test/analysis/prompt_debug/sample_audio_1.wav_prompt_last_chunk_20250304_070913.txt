@@ -1,0 +1,95 @@
+Template: grading_user_prompt_last_chunk
+Context Type: last chunk
+Overlap Seconds: 5
+Generated: 20250304_070913
+================================================================================
+
+Analyze this LAST transcription chunk with a PRIMARY FOCUS on the quality of the join from the previous chunk, particularly verbatim text preservation and sentence continuity. You MUST provide AT LEAST 6 DETAILED reasoning steps with thorough explanations, then score each criterion from 0 to 10 (where 10 is perfect):
+
+# AUDIO CHUNKING INFORMATION
+The audio has been chunked with 5 seconds of padding overlap between chunks to ensure continuity. This is the LAST chunk, so it has 5 seconds of padding at the beginning that overlaps with the previous chunk, but no padding at the end.
+
+# PREVIOUS CHUNK
+[Previous chunk with padding at the end: 5 seconds]
+This is the middle chunk that continues from the first one.
+
+# WHISPER PROMPT USED
+Prompt used for transcription: Transcribe the following audio
+NOTE: Consider how this prompt may affect join quality.
+
+# CURRENT CHUNK (LAST)
+[Current chunk with padding at start: 5 seconds]
+---------------------
+This is the final chunk that concludes our transcription.
+---------------------
+
+Your response MUST be a JSON object with these fields IN THIS ORDER:
+- "reasoning_steps": array FIRST (with at least 6 detailed steps)
+- "verbatim_match_score": int (0-10)
+- "sentence_preservation_score": int (0-10)
+- "content_duplication_score": int (0-10)
+- "content_loss_score": int (0-10)
+- "join_transition_score": int (0-10)
+- "contextual_flow_score": int (0-10)
+
+### INSTRUCTIONS FOR ANALYSIS
+Focus on the join from the previous chunk, evaluating:
+1. **Verbatim Match**:
+   - If 5 > 0: Is the start padding text identical, character by character, to the previous chunk’s end padding? Quote both texts and highlight any differences.
+   - If 5 = 0: Set verbatim_match_score to 0, as no overlap is expected. Instead, evaluate logical continuity for sentence_preservation_score and contextual_flow_score, quoting both chunk ends to justify observations. Example: 'Previous end: "The dog" Start: "barks loudly" – logical but not verbatim.'
+2. **Sentence Preservation**:
+   - Are sentences from the previous chunk continued correctly in this chunk? Identify any sentence crossing the join, quote both parts, and reconstruct them to verify grammatical correctness (e.g., 'Previous: "The fox" Current: "runs fast" = "The fox runs fast" – score 10; 'Previous: "The fox" Current: "is sleeping" – score 0'). If no split, score based on logical continuity.
+3. **Content Duplication**:
+   - Is there unnecessary repetition at the join? Quote any duplicated text outside the overlap region.
+4. **Content Loss**:
+   - Is any content missing at the join? Quote text around the join to show if words/phrases are dropped.
+5. **Join Transition**:
+   - Is the transition from the previous chunk smooth? Read across the join and describe any awkwardness.
+6. **Contextual Flow**:
+   - Is the context preserved? Explain any shifts in topic or intent that disrupt understanding.
+
+**Mandatory Requirement**: In EVERY reasoning step, quote the exact text from both chunk ends involved in the join (e.g., 'Previous end: "The quick fox" Current start: "jumps over"'). Observations without quotes are invalid. Example: 'Previous end: "runs" Current start: "fast" – no split detected.'
+
+### SUGGESTED REASONING STEPS
+- **Step 1**: Compare the start padding of this chunk with the end padding of the previous chunk. Quote both texts. If 5 > 0, check for exact verbatim matches; if 0, note logical continuity.
+- **Step 2**: Check if sentences from the previous chunk continue correctly in this chunk. Quote the sentence parts and verify.
+- **Step 3**: Look for unnecessary duplication at the join. Quote any repeated text and assess if it’s excessive.
+- **Step 4**: Identify any content loss at the join. Quote text around the join to highlight missing elements.
+- **Step 5**: Read across the join aloud. Quote the transition text and evaluate smoothness.
+- **Step 6**: Assess contextual continuity across the join. Explain how the context flows or is disrupted.
+
+### SCORING GUIDELINES
+Assign scores from 0-10 based on these detailed criteria:
+- **verbatim_match_score**:
+  - 10: Exact match in overlap (e.g., 'the quick fox' = 'the quick fox').
+  - 8: Minor differences (e.g., 'the fox' vs. 'the foxes').
+  - 5: Partial similarity (e.g., 'the fox runs' vs. 'the dog runs').
+  - 0: Completely different or no overlap when expected (e.g., 'the fox' vs. 'hello world').
+  - If 5 = 0, score 0.
+- **sentence_preservation_score**:
+  - 10: All split sentences continue perfectly (e.g., 'The fox' + 'runs fast').
+  - 8: Minor alterations but meaning preserved (e.g., 'The fox' + 'is running').
+  - 5: Sentence truncated but partially continued (e.g., 'The fox' + 'fast').
+  - 0: Sentence lost entirely (e.g., 'The fox' + 'Hello world').
+- **content_duplication_score**:
+  - 10: No duplication beyond overlap (e.g., overlap text matches, no extra repeats).
+  - 8: Slight repetition within overlap (e.g., overlap slightly extended).
+  - 5: Noticeable duplication outside overlap (e.g., full sentence repeated).
+  - 0: Excessive duplication (e.g., multiple sentences repeated).
+- **content_loss_score**:
+  - 10: No loss (e.g., 'The fox runs' fully present).
+  - 8: Minor loss, meaning intact (e.g., 'The fox runs' to 'The fox').
+  - 5: Moderate loss, meaning affected (e.g., 'The fox runs' to 'runs').
+  - 0: Significant loss (e.g., 'The fox runs' to 'The').
+- **join_transition_score**:
+  - 10: Perfectly smooth (e.g., reads like one sentence).
+  - 8: Slightly noticeable join (e.g., minor pause in flow).
+  - 5: Awkward but readable (e.g., abrupt phrase end).
+  - 0: Highly disruptive (e.g., incoherent break).
+- **contextual_flow_score**:
+  - 10: Context fully maintained (e.g., topic continues naturally).
+  - 8: Minor context shift (e.g., slight topic drift).
+  - 5: Noticeable shift, meaning intact (e.g., new idea starts).
+  - 0: Context broken (e.g., unrelated ideas).
+
+IMPORTANT: Provide EXTREMELY DETAILED reasoning steps BEFORE scoring. Use examples to justify findings.

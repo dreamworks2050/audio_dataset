@@ -1,7 +1,7 @@
 Transcription Analysis Summary - example_parameters
 ==================================================
 
-Generated: 2025-02-28 19:07:54
+Generated: 2025-03-04 07:32:10
 
 Overview:
 - Total files analyzed: 3
@@ -10,17 +10,15 @@ Overview:
 - Files with retries: 0
 - Skipped files: 0
 
-Overall Average Score: 6.54/10
+Overall Average Score: 7.28/10
 
 Detailed Metrics:
-- Overall Accuracy: 7.67/10
-- Joint Smoothness: 4.67/10
-- Contextual Continuity: 4.33/10
-- Grammar Integrity: 8.0/10
-- Word Completeness: 10.0/10
-- Redundancy: 5.67/10
-- Content Loss: 6.67/10
-- Joint Readability: 5.33/10
+- Verbatim Match Score: 0.0/10
+- Sentence Preservation Score: 7.67/10
+- Content Duplication Score: 10.0/10
+- Content Loss Score: 10.0/10
+- Join Transition Score: 8.0/10
+- Contextual Flow Score: 8.0/10
 
 Recommendations:
-- The transcription quality is moderate. Consider fine-tuning for better results.
+- The transcription quality is good. Continue with current settings.

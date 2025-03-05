@@ -118,6 +118,97 @@ The system generates several output files:
 The system provides automatic recommendations based on analysis results:
 - Suggestions for optimal chunk size and overlap settings
 - Identification of problematic combinations
+
+## Audio AI Analysis Visualizations
+
+This script generates visualizations and a comprehensive report from your audio AI analysis data.
+
+## Setup
+
+Make sure you have Python installed, then install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Running the Script
+
+Simply execute the visualization script:
+
+```bash
+python visualize_audio_analysis.py
+```
+
+## Output
+
+The script will generate visualizations in the `visualizations/` directory:
+
+1. **processing_times.png** - Bar charts of processing times by chunk and overlap lengths
+2. **parameter_heatmap.png** - Heatmap showing performance of different chunk/overlap combinations
+3. **metrics_comparison.png** - Comparison of different evaluation metrics
+4. **top_combinations.png** - The top performing parameter combinations
+5. **chunk_overlap_scatter.png** - Scatter plot showing relationship between chunk length, overlap, and scores
+6. **comprehensive_report.html** - An HTML report integrating all visualizations with summary statistics
+
+## Understanding the Visualizations
+
+### Processing Times
+Shows the average processing time for different chunk lengths and overlap lengths. This helps identify efficiency tradeoffs.
+
+### Parameter Heatmap
+A color-coded grid showing how each combination of chunk length and overlap performs. Darker colors indicate better performance.
+
+### Top Combinations
+Bar chart showing the highest-scoring parameter combinations, providing a quick view of which settings performed best.
+
+### Chunk vs Overlap Scatter Plot
+Scatter plot showing each parameter combination, with chunk length on the x-axis, score on the y-axis, and color indicating overlap percentage.
+
+### Metrics Comparison
+Comparison of different evaluation metrics across all parameter combinations, showing which aspects perform better or worse.
+
+## Customizing the Visualizations
+
+To modify the visualizations, edit the `visualize_audio_analysis.py` file. You can adjust:
+
+- Colors and styles in the plotting functions
+- Number of top combinations to display (`n` parameter in `plot_best_combinations()`)
+- HTML report layout and styling in the `generate_html_report()` function
+
+## Understanding Analysis Results
+
+Each chunk analysis provides:
+- Score for each criterion (0-10)
+- Step-by-step reasoning
+- Overall average score
+- Specific observations about the joint quality
+- Analysis duration and performance metrics
+
+The system generates several output files:
+- `detailed_analysis.log`: Complete log of the analysis process
+- `summary.json`: Machine-readable summary of all results
+- `summary.txt`: Human-readable summary with recommendations
+- Individual chunk analysis files in both JSON and TXT formats
+
+### Analysis Metrics Explained
+
+- **Overall Accuracy**: How accurately the transcription captures the spoken content
+- **Joint Smoothness**: How well the chunks connect at their boundaries
+- **Contextual Continuity**: Whether the meaning flows naturally across chunk boundaries
+- **Grammar Integrity**: Grammatical correctness at chunk boundaries
+- **Word Completeness**: Whether words are complete at chunk boundaries
+- **Redundancy**: Repeated content across chunk boundaries
+- **Content Loss**: Missing content at chunk boundaries
+- **Joint Readability**: How readable the text is across chunk boundaries
+
+### Recommendations
+
+The system provides automatic recommendations based on analysis results:
+- Suggestions for optimal chunk size and overlap settings
+- Identification of problematic combinations
+
+## File Structure
+
 ```
 ./
 ├── audio/           # Directory for extracted audio files

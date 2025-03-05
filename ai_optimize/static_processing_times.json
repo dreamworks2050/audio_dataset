@@ -40,6 +40,14 @@
   "chunk15s_overlap10s_Spanish": 35.2,
   "chunk10s_overlap1s_Spanish": 35.1,
   "chunk10s_overlap3s_Spanish": 32.8,
-  "chunk10s_overlap0s_Spanish": 34.3
-
+  "chunk10s_overlap0s_Spanish": 34.3,
+  "chunk200s_overlap0s_Korean": 34.9,
+  "chunk200s_overlap20s_Korean": 28.0,
+  "chunk200s_overlap15s_Korean": 30.2,
+  "chunk200s_overlap3s_Korean": 26.1,
+  "chunk200s_overlap10s_Korean": 29.6,
+  "chunk200s_overlap1s_Korean": 29.4,
+  "chunk200s_overlap5s_Korean": 26.9,
+  "chunk45s_overlap5s_Korean": 37.3,
+  "chunk45s_overlap0s_Korean": 31.4
 }

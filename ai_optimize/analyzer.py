@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 import time
 import re
 from ollama import AsyncClient
+import hashlib
 
 # Setup logging
 logging.basicConfig(
@@ -157,16 +158,18 @@ class GradingResult(BaseModel):
 class TranscriptionAnalyzer:
     """Analyzer for evaluating transcription quality"""
     
-    def __init__(self, model_name="mistral-small:24b-instruct-2501-q4_K_M"):
+    def __init__(self, model_name="mistral-small:24b-instruct-2501-q4_K_M", language="en"):
         """
-        Initialize the analyzer with the specified AI model.
+        Initialize the analyzer with the specified AI model and language.
         
         Args:
             model_name: Name of the model to use for analysis
+            language: Language code (e.g., "en", "kr") for selecting prompt files
         """
         self.model_name = model_name
+        self.language = language
         self.prompts = self._load_prompts()
-        logger.info(f"Initialized TranscriptionAnalyzer with model: {model_name}")
+        logger.info(f"Initialized TranscriptionAnalyzer with model: {model_name}, language: {language}")
         
     @staticmethod
     def get_analysis_dir(dir_path=None):
@@ -184,13 +187,40 @@ class TranscriptionAnalyzer:
         return dir_path
     
     def _load_prompts(self) -> Dict[str, str]:
-        """Load the prompts from the JSON file"""
+        """
+        Load the prompts from the JSON file based on the language.
+        Falls back to default English prompts if language-specific prompts not found.
+        """
+        # Determine the prompt file path based on language
+        prompt_file = f"ai_optimize/ai_optimizer_prompts_{self.language}.json"
+        default_prompt_file = "ai_optimize/ai_optimizer_prompts.json"
+        
+        # Add more detailed logging
+        logger.warning(f"*** PROMPT FILE LOADING DEBUG ***")
+        logger.warning(f"* Language code: {self.language}")
+        logger.warning(f"* Trying to load prompt file: {prompt_file}")
+        logger.warning(f"* Prompt file exists: {os.path.exists(prompt_file)}")
+        logger.warning(f"* Default prompt file exists: {os.path.exists(default_prompt_file)}")
+        
         try:
-            with open("ai_optimize/ai_optimizer_prompts.json", "r") as f:
-                prompts = json.load(f)
+            # First try loading language-specific prompts
+            if os.path.exists(prompt_file):
+                with open(prompt_file, "r") as f:
+                    prompts = json.load(f)
+                logger.info(f"Successfully loaded analysis prompts for language: {self.language}")
+            else:
+                # If language-specific prompts don't exist and it's not English, error out
+                if self.language != "en":
+                    error_msg = f"Prompt file for language '{self.language}' not found at {prompt_file}"
+                    logger.error(error_msg)
+                    raise FileNotFoundError(error_msg)
+                
+                # For English, use the default prompts
+                with open(default_prompt_file, "r") as f:
+                    prompts = json.load(f)
+                logger.info("Successfully loaded default (English) analysis prompts")
             
             # Add detailed debugging about loaded prompts
-            logger.info("Successfully loaded analysis prompts")
             logger.debug(f"Prompts loaded: {list(prompts.keys())}")
             for key, value in prompts.items():
                 logger.debug(f"  - {key}: length {len(value)} chars, starts with: {value[:50]}...")
@@ -238,6 +268,22 @@ class TranscriptionAnalyzer:
         next_chunk = next_chunk or "No next chunk available"
         prompt_used = prompt_used or "No prompt information available"
         
+        # Create a default chunk info if not already set
+        if not hasattr(self, 'current_chunk_info') or not self.current_chunk_info:
+            # Create a simple identifier for the chunk
+            chunk_id = hashlib.md5(current_chunk[:100].encode()).hexdigest()[:8]
+            self.current_chunk_info = {
+                "chunk_number": 0,
+                "filename": f"direct_chunk_{chunk_id}",
+                "audio_file": "unknown"
+            }
+            
+            # If there's no params dir set, create a default one
+            if not hasattr(self, 'current_params_dir') or not self.current_params_dir:
+                analysis_dir = self.get_analysis_dir()
+                self.current_params_dir = os.path.join(analysis_dir, "direct_analysis")
+                os.makedirs(self.current_params_dir, exist_ok=True)
+        
         # Print the first 100 chars of each chunk for debugging
         logger.debug(f"CHUNK VALUES:")
         logger.debug(f"  - current_chunk: {current_chunk[:100]}... (length: {len(current_chunk)})")
@@ -246,19 +292,35 @@ class TranscriptionAnalyzer:
         logger.debug(f"  - prompt_used: {prompt_used[:100]}... (length: {len(prompt_used)})")
         logger.debug(f"  - overlap_seconds: {overlap_seconds}")
         
-        # Determine which prompt to use based on available context
+        # Determine which prompt to use based on available context and overlap seconds
         if previous_chunk == "No previous chunk available" and next_chunk != "No next chunk available":
             # First chunk
-            template_key = "grading_user_prompt_first_chunk"
+            if overlap_seconds == 0:
+                template_key = "grading_user_prompt_first_chunk_zero_overlap"
+            else:
+                template_key = "grading_user_prompt_first_chunk"
             context_type = "first chunk"
         elif previous_chunk != "No previous chunk available" and next_chunk == "No next chunk available":
             # Last chunk
-            template_key = "grading_user_prompt_last_chunk"
+            if overlap_seconds == 0:
+                template_key = "grading_user_prompt_last_chunk_zero_overlap"
+            else:
+                template_key = "grading_user_prompt_last_chunk"
             context_type = "last chunk"
         else:
             # Middle chunk
-            template_key = "grading_user_prompt_standard"
+            if overlap_seconds == 0:
+                template_key = "grading_user_prompt_standard_zero_overlap"
+            else:
+                template_key = "grading_user_prompt_standard"
             context_type = "middle chunk"
+        
+        # Add more detailed logging about language and template selection
+        logger.warning(f"*** PROMPT TEMPLATE SELECTION DEBUG ***")
+        logger.warning(f"* Language code: {self.language}")
+        logger.warning(f"* Context type: {context_type}")
+        logger.warning(f"* Selected template key: {template_key}")
+        logger.warning(f"* Available templates: {list(self.prompts.keys())}")
         
         # Validate that the template exists in our prompts
         if template_key not in self.prompts:
@@ -417,6 +479,59 @@ class TranscriptionAnalyzer:
                 logger.info(f"Schema: {json.dumps(schema, default=str)[:500]}...")
                 logger.info(f"Options: {json.dumps(request_params.get('options', {}))}")
                 logger.info("====================================================")
+                
+                # Save the prompt to a text file in the working folder for this run
+                if hasattr(self, 'current_chunk_info') and self.current_chunk_info and hasattr(self, 'current_params_dir') and self.current_params_dir:
+                    try:
+                        # Get relevant information
+                        chunk_number = self.current_chunk_info.get('chunk_number', 'unknown')
+                        # Create a clean filename from the chunk name and combination
+                        chunk_name = self.current_chunk_info.get('filename', f"chunk_{chunk_number}")
+                        
+                        # Extract combination name from params_dir if available
+                        combination = os.path.basename(self.current_params_dir)
+                        if combination == "raw_responses" or combination == "direct_analysis":
+                            combination = "direct"
+                        
+                        # Extract run timestamp from directory path - typically in format "run_YYYYMMDD_HHMMSS"
+                        run_timestamp = ""
+                        parent_dirs = self.current_params_dir.split(os.path.sep)
+                        for dir_name in parent_dirs:
+                            if dir_name.startswith("run_") and len(dir_name) > 15:  # run_ plus YYYYMMDD_HHMMSS
+                                run_timestamp = dir_name[4:]  # Remove "run_" prefix
+                                break
+                        
+                        # If no run timestamp found, use current time as fallback
+                        if not run_timestamp:
+                            run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        
+                        # Create a unique filename including real chunk number, combination, and language
+                        language_suffix = f"_{self.language}" if hasattr(self, 'language') and self.language else ""
+                        
+                        # Use chunk_name which might contain the real chunk number from the filename
+                        # Extract chunk number from filename if present (e.g., "chunk_5" -> "5")
+                        chunk_id = "0"
+                        if isinstance(chunk_name, str):
+                            chunk_match = re.search(r'chunk[_]?(\d+)', chunk_name)
+                            if chunk_match:
+                                chunk_id = chunk_match.group(1)
+                            # Also check if filename contains a number directly
+                            elif re.search(r'\d+', chunk_name):
+                                chunk_id = re.search(r'(\d+)', chunk_name).group(1)
+                        
+                        prompt_filename = f"{combination}_chunk{chunk_id}{language_suffix}_{run_timestamp}_prompt.txt"
+                        prompt_path = os.path.join(self.current_params_dir, prompt_filename)
+                        
+                        # Write both system and user prompts to the file
+                        with open(prompt_path, 'w', encoding='utf-8') as f:
+                            f.write("===== SYSTEM PROMPT =====\n\n")
+                            f.write(system_prompt)
+                            f.write("\n\n===== USER PROMPT =====\n\n")
+                            f.write(prompt)
+                            
+                        logger.info(f"Saved prompt to {prompt_path}")
+                    except Exception as e:
+                        logger.error(f"Error saving prompt to file: {str(e)}")
                 
                 # Make the API call with a timeout
                 logger.debug(f"Request parameters: {json.dumps(request_params, default=str)[:500]}...")
@@ -696,6 +811,9 @@ class TranscriptionAnalyzer:
         retried_files = 0
         skipped_files = 0
         
+        # Store the current params directory for prompt saving
+        self.current_params_dir = params_dir
+        
         for i, transcription_data in enumerate(sorted_transcriptions):
             # Get transcription data
             transcription = transcription_data.get("transcription", "").strip()
@@ -703,6 +821,13 @@ class TranscriptionAnalyzer:
             filename = transcription_data.get("filename", f"chunk_{chunk_number}")
             audio_file = transcription_data.get("audio_file", "unknown_file")
             prompt_used = transcription_data.get("prompt", "")
+            
+            # Store the current chunk info for prompt saving
+            self.current_chunk_info = {
+                "chunk_number": chunk_number,
+                "filename": filename,
+                "audio_file": audio_file
+            }
             
             # Use overlap_seconds from the transcription data if available, otherwise use the provided value
             chunk_overlap_seconds = transcription_data.get("overlap_seconds", overlap_seconds)
@@ -956,158 +1081,26 @@ class TranscriptionAnalyzer:
                     f.write("\nAverage scores by category:\n")
                     for metric, value in param_summary['detailed_metrics'].items():
                         f.write(f"- {metric.replace('_', ' ').title()}: {value}/10\n")
-            
+                
             logger.info(f"Analysis batch completed for parameter set {params_name}. Processed {total_files} files with {successful_files} successful analyses")
+            
+            # Clean up the working properties
+            if hasattr(self, 'current_params_dir'):
+                delattr(self, 'current_params_dir')
+            if hasattr(self, 'current_chunk_info'):
+                delattr(self, 'current_chunk_info')
+                
             return param_summary
         except Exception as e:
-            logger.error(f"Error creating summary for parameter set {params_name}: {str(e)}", exc_info=True)
-            
-            # Log error to the detailed log
-            with open(analysis_log_path, 'a', encoding='utf-8') as f:
-                f.write(f"\n❌ ERROR creating summary: {str(e)}\n")
-                f.write(f"Analysis batch completed with errors at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            
-            raise
-
-    def _create_parameter_summary(self, 
-                                    results: List[Dict[str, Any]], 
-                                    output_dir: str,
-                                    params_name: str,
-                                    stats: Dict[str, int]) -> Dict[str, Any]:
-        """Create a summary of analysis results for a specific parameter set
+            logger.error(f"Error creating parameter summary: {str(e)}")
         
-        Args:
-            results: List of analysis results
-            output_dir: Directory to store summary
-            params_name: Name of the parameter set
-            stats: Dictionary with processing statistics
-            
-        Returns:
-            Dictionary with summary information
-        """
-        logger.info(f"Creating analysis summary for parameter set: {params_name}")
+        # Clean up the working properties
+        if hasattr(self, 'current_params_dir'):
+            delattr(self, 'current_params_dir')
+        if hasattr(self, 'current_chunk_info'):
+            delattr(self, 'current_chunk_info')
         
-        # Count successful and failed analyses
-        successful_analyses = [r for r in results if "error" not in r]
-        failed_analyses = [r for r in results if "error" in r]
-        
-        # Calculate overall average score
-        overall_average_score = 0
-        if successful_analyses:
-            overall_average_score = sum(r["average_score"] for r in successful_analyses) / len(successful_analyses)
-            overall_average_score = round(overall_average_score, 2)
-        
-        # Create detailed metrics if we have successful analyses
-        detailed_metrics = {}
-        if successful_analyses:
-            try:
-                # Get all the metric keys from the first successful analysis
-                first_analysis = successful_analyses[0]["analysis_result"]
-                metric_keys = [k for k in first_analysis.keys() if isinstance(first_analysis[k], (int, float)) and k != "average_score"]
-                
-                # Calculate average for each metric
-                for key in metric_keys:
-                    values = [r["analysis_result"][key] for r in successful_analyses if key in r["analysis_result"]]
-                    if values:
-                        detailed_metrics[key] = round(sum(values) / len(values), 2)
-            except Exception as e:
-                logger.warning(f"Error calculating detailed metrics: {str(e)}")
-                detailed_metrics = {"error": str(e)}
-        
-        # Create summary dictionary
-        summary = {
-            "parameter_set": params_name,
-            "total_files": stats["total_files"],
-            "successful_analyses": stats["successful_files"],
-            "failed_analyses": stats["failed_files"],
-            "retried_files": stats["retried_files"],
-            "skipped_files": stats["skipped_files"],
-            "overall_average_score": overall_average_score,
-            "detailed_metrics": detailed_metrics,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        
-        # Add error information if there were failures
-        if failed_analyses:
-            error_types = {}
-            for failure in failed_analyses:
-                error_type = failure.get("error_type", "Unknown")
-                if error_type not in error_types:
-                    error_types[error_type] = 0
-                error_types[error_type] += 1
-            
-            summary["error_summary"] = {
-                "error_types": error_types,
-                "error_examples": [
-                    {
-                        "chunk_number": failure.get("chunk_number", "Unknown"),
-                        "filename": failure.get("filename", "Unknown"),
-                        "error": failure.get("error", "Unknown error")
-                    }
-                    for failure in failed_analyses[:3]  # Include up to 3 examples
-                ]
-            }
-        
-        # Save summary to file
-        params_summary_dir = os.path.join(output_dir, "parameters", params_name) if params_name else os.path.join(output_dir)
-        os.makedirs(params_summary_dir, exist_ok=True)
-        
-        summary_path = os.path.join(params_summary_dir, "summary.json")
-        with open(summary_path, "w") as f:
-            json.dump(summary, f, indent=2)
-        
-        # Create a human-readable summary
-        readable_summary_path = os.path.join(params_summary_dir, "summary.txt")
-        with open(readable_summary_path, "w") as f:
-            f.write(f"Transcription Analysis Summary - {params_name}\n")
-            f.write("=" * 50 + "\n\n")
-            f.write(f"Generated: {summary['timestamp']}\n\n")
-            
-            f.write("Overview:\n")
-            f.write(f"- Total files analyzed: {summary['total_files']}\n")
-            f.write(f"- Successful analyses: {summary['successful_analyses']}\n")
-            f.write(f"- Failed analyses: {summary['failed_analyses']}\n")
-            f.write(f"- Files with retries: {summary['retried_files']}\n")
-            f.write(f"- Skipped files: {summary['skipped_files']}\n")
-            
-            if successful_analyses:
-                f.write(f"\nOverall Average Score: {overall_average_score}/10\n\n")
-                
-                f.write("Detailed Metrics:\n")
-                for metric, value in detailed_metrics.items():
-                    # Format the metric name for better readability
-                    formatted_metric = metric.replace("_", " ").title()
-                    f.write(f"- {formatted_metric}: {value}/10\n")
-            
-            if failed_analyses:
-                f.write("\nError Summary:\n")
-                for error_type, count in summary.get("error_summary", {}).get("error_types", {}).items():
-                    f.write(f"- {error_type}: {count} occurrences\n")
-                
-                f.write("\nExample Errors:\n")
-                for i, example in enumerate(summary.get("error_summary", {}).get("error_examples", [])):
-                    f.write(f"Example {i+1}:\n")
-                    f.write(f"  Chunk: {example.get('chunk_number')}\n")
-                    f.write(f"  File: {example.get('filename')}\n")
-                    f.write(f"  Error: {example.get('error')}\n\n")
-            
-            f.write("\nRecommendations:\n")
-            if failed_analyses:
-                f.write("- Review the error examples and address any issues with the Ollama API or model.\n")
-                f.write("- Check if the Ollama service is running correctly.\n")
-                f.write("- Verify that the model is available in your Ollama installation.\n")
-            
-            if successful_analyses:
-                # Add recommendations based on the average score
-                if overall_average_score < 5:
-                    f.write("- The overall quality of transcriptions is low. Consider adjusting transcription parameters.\n")
-                elif overall_average_score < 7:
-                    f.write("- The transcription quality is moderate. Consider fine-tuning for better results.\n")
-                else:
-                    f.write("- The transcription quality is good. Continue with current settings.\n")
-        
-        logger.info(f"Analysis summary created for parameter set {params_name} with overall score: {overall_average_score}/10")
-        return summary
+        return param_summary
     
     async def run_analysis(self, run_dir: str) -> Dict[str, Any]:
         """
@@ -1409,4 +1402,51 @@ class TranscriptionAnalyzer:
                     f.write("- The transcription quality is good. Continue with current settings.\n")
         
         logger.info(f"Analysis summary created with overall score: {overall_average_score}/10")
-        return summary 
+        return summary
+
+    def save_prompt_file(self, prompt_text, combination, language_suffix="en"):
+        """Save the prompt to a file for debugging purposes."""
+        try:
+            # Try to get chunk number from the current_chunk_info
+            chunk_id = "0"  # Default value
+            
+            # Try to extract chunk number from the file path if available
+            if hasattr(self, 'current_chunk_info') and self.current_chunk_info is not None:
+                chunk_path = self.current_chunk_info.get('file_path', '')
+                # Check if chunk ID is in the filename
+                if chunk_path:
+                    # Try to extract the chunk number from the filename (format: chunk_X.txt)
+                    chunk_match = re.search(r'chunk_(\d+)\.', chunk_path)
+                    if chunk_match:
+                        chunk_id = chunk_match.group(1)
+            
+            # Try to extract the run timestamp from the directory path
+            run_timestamp = None
+            if hasattr(self, 'current_chunk_info') and self.current_chunk_info is not None:
+                chunk_path = self.current_chunk_info.get('file_path', '')
+                if chunk_path:
+                    # Look for directories that start with "run_" and extract the timestamp
+                    path_parts = chunk_path.split('/')
+                    for part in path_parts:
+                        if part.startswith('run_'):
+                            run_timestamp = part.replace('run_', '')
+                            break
+            
+            # Use current time as fallback if no run timestamp found
+            if not run_timestamp:
+                run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                
+            # Create the filename with the format: {combination}_chunk{chunk_id}_{language}_{run_timestamp}_prompt.txt
+            filename = f"{combination}_chunk{chunk_id}_{language_suffix}_{run_timestamp}_prompt.txt"
+            
+            # Ensure the directory exists
+            os.makedirs(os.path.dirname(PROMPT_DIR), exist_ok=True)
+            
+            # Save the prompt to a file
+            prompt_file_path = os.path.join(PROMPT_DIR, filename)
+            with open(prompt_file_path, 'w', encoding='utf-8') as file:
+                file.write(prompt_text)
+            
+            logging.warning(f"Saved prompt to file: {prompt_file_path}")
+        except Exception as e:
+            logging.error(f"Error saving prompt file: {str(e)}") 

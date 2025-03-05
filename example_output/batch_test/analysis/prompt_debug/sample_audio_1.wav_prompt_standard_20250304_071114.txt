@@ -1,0 +1,104 @@
+Template: grading_user_prompt_standard
+Context Type: middle chunk
+Overlap Seconds: 5
+Generated: 20250304_071114
+================================================================================
+
+Analyze this transcription chunk with a PRIMARY FOCUS on the quality of the joins to neighboring chunks, particularly verbatim text preservation and sentence continuity across joins. You MUST provide AT LEAST 6 DETAILED reasoning steps with thorough explanations, then score each criterion from 0 to 10 (where 10 is perfect):
+
+# AUDIO CHUNKING INFORMATION
+The audio has been chunked with 5 seconds of padding overlap between chunks to ensure continuity. Each chunk contains padding at the beginning and end that overlaps with neighboring chunks. These overlap regions should contain identical text to maintain seamless transitions.
+
+# PREVIOUS CHUNK
+[Previous chunk with padding at the end: 5 seconds]
+This is the first chunk of our sample transcription for testing.
+
+# WHISPER PROMPT USED
+Prompt used for transcription: Transcribe the following audio
+NOTE: Consider how this prompt may affect join quality (e.g., context influencing overlap consistency).
+
+# CURRENT CHUNK
+[Current chunk with padding at start: 5 seconds]
+---------------------
+This is the middle chunk that continues from the first one.
+---------------------
+[Current chunk with padding at end: 5 seconds]
+
+# NEXT CHUNK
+[Next chunk with padding at start: 5 seconds]
+This is the final chunk that concludes our transcription.
+
+Your response MUST be a JSON object with these fields IN THIS ORDER:
+- "reasoning_steps": array FIRST (with at least 6 detailed steps)
+- "verbatim_match_score": int (0-10)
+- "sentence_preservation_score": int (0-10)
+- "content_duplication_score": int (0-10)
+- "content_loss_score": int (0-10)
+- "join_transition_score": int (0-10)
+- "contextual_flow_score": int (0-10)
+
+### INSTRUCTIONS FOR ANALYSIS
+Focus EXCLUSIVELY on the joins BETWEEN chunks, evaluating how well verbatim text is preserved and whether sentences are maintained across overlaps. Assess if joins are poorly executed by checking:
+1. **Verbatim Match**:
+   - If 5 > 0: Is the text in overlapping regions identical, character by character? Quote the exact text from the end padding of the previous chunk and the start padding of the current chunk, and from the end padding of the current chunk and the start padding of the next chunk. Highlight any differences (e.g., 'the dog runs' vs. 'the dogs run').
+   - If 5 = 0: Set verbatim_match_score to 0, as no overlap is expected. Instead, evaluate logical continuity for sentence_preservation_score and contextual_flow_score, quoting both chunk ends to justify observations. Example: 'End: "The dog" Start: "barks loudly" – logical but not verbatim.'
+2. **Sentence Preservation**:
+   - Are sentences split across chunks continued accurately and completely? Identify any sentence crossing a join, quote both parts, and reconstruct them to verify grammatical correctness (e.g., 'Previous: "The fox" Current: "runs fast" = "The fox runs fast" – score 10; 'Previous: "The fox" Current: "is sleeping" – score 0'). If no split, score based on logical continuity. 
+3. **Content Duplication**:
+   - Is there unnecessary repetition beyond the intended overlap? Quote any duplicated text outside the overlap region (e.g., a full sentence repeated unnecessarily).
+4. **Content Loss**:
+   - Is any content missing at the joins? Quote text around the join to show if words/phrases are dropped (e.g., 'The dog runs' to 'fast' missing 'runs').
+5. **Join Transition**:
+   - Does the join feel smooth and natural when reading aloud? Read across the join and describe any awkwardness (e.g., abrupt topic shifts or incomplete phrases).
+6. **Contextual Flow**:
+   - Is the meaning and context preserved across the join? Explain any shifts in topic or intent that disrupt understanding.
+
+**Mandatory Requirement**: In EVERY reasoning step, quote the exact text from both chunk ends involved in the join (e.g., 'Previous end: "The quick fox" Current start: "jumps over"'). Observations without quotes are invalid. Example: 'Previous end: "runs" Current start: "fast" – no split detected.'
+
+### SUGGESTED REASONING STEPS
+Use these steps to evaluate join quality:
+- **Step 1**: Compare the end padding of the previous chunk with the start padding of the current chunk. Quote both texts. If 5 > 0, check for exact verbatim matches; if 0, note logical continuity.
+- **Step 2**: Compare the end padding of the current chunk with the start padding of the next chunk. Quote both texts and assess as above.
+- **Step 3**: Identify any sentence split across joins (previous-to-current or current-to-next). Quote the sentence parts and check if they connect correctly.
+- **Step 4**: Examine the joins for unnecessary duplication beyond the overlap. Quote any repeated text and determine if it’s excessive.
+- **Step 5**: Check for content loss at each join. Quote text around the join to highlight missing elements.
+- **Step 6**: Read across both joins aloud (previous-to-current and current-to-next). Quote the transition text and assess smoothness and contextual coherence.
+
+### SCORING GUIDELINES
+Assign scores from 0-10 based on these detailed criteria:
+- **verbatim_match_score**:
+  - 10: Exact match in overlap (e.g., 'the quick fox' = 'the quick fox').
+  - 8: Minor differences (e.g., 'the fox' vs. 'the foxes').
+  - 5: Partial similarity (e.g., 'the fox runs' vs. 'the dog runs').
+  - 0: Completely different or no overlap when expected (e.g., 'the fox' vs. 'hello world').
+  - If 5 = 0, score 0.
+- **sentence_preservation_score**:
+  - 10: All split sentences continue perfectly (e.g., 'The fox' + 'runs fast').
+  - 8: Minor alterations but meaning preserved (e.g., 'The fox' + 'is running').
+  - 5: Sentence truncated but partially continued (e.g., 'The fox' + 'fast').
+  - 0: Sentence lost entirely (e.g., 'The fox' + 'Hello world').
+- **content_duplication_score**:
+  - 10: No duplication beyond overlap (e.g., overlap text matches, no extra repeats).
+  - 8: Slight repetition within overlap (e.g., overlap slightly extended).
+  - 5: Noticeable duplication outside overlap (e.g., full sentence repeated).
+  - 0: Excessive duplication (e.g., multiple sentences repeated).
+- **content_loss_score**:
+  - 10: No loss (e.g., 'The fox runs' fully present).
+  - 8: Minor loss, meaning intact (e.g., 'The fox runs' to 'The fox').
+  - 5: Moderate loss, meaning affected (e.g., 'The fox runs' to 'runs').
+  - 0: Significant loss (e.g., 'The fox runs' to 'The').
+- **join_transition_score**:
+  - 10: Perfectly smooth (e.g., reads like one sentence).
+  - 8: Slightly noticeable join (e.g., minor pause in flow).
+  - 5: Awkward but readable (e.g., abrupt phrase end).
+  - 0: Highly disruptive (e.g., incoherent break).
+- **contextual_flow_score**:
+  - 10: Context fully maintained (e.g., topic continues naturally).
+  - 8: Minor context shift (e.g., slight topic drift).
+  - 5: Noticeable shift, meaning intact (e.g., new idea starts).
+  - 0: Context broken (e.g., unrelated ideas).
+
+IMPORTANT: Provide EXTREMELY DETAILED reasoning steps BEFORE scoring. Use examples to support your findings. Focus ONLY on join quality, as within-chunk accuracy is not the concern.
+
+### JOIN EVALUATION CLARIFICATION
+For standard chunks, evaluate both joins (previous-to-current and current-to-next) separately in reasoning steps, quoting text for each. Provide a single set of scores reflecting overall quality unless one join is significantly worse, then justify the lower score (e.g., 'Previous join perfect, current join abrupt – score reflects average').

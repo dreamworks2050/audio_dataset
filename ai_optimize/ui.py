@@ -116,11 +116,11 @@ def create_ai_optimize_tab():
                         
                         # Checkboxes for chunk lengths in a single row, including custom
                         with gr.Row():
-                            chunk_10s = gr.Checkbox(label="10s", value=True)
+                            chunk_10s = gr.Checkbox(label="10s", value=False)
                             chunk_15s = gr.Checkbox(label="15s", value=False)
-                            chunk_20s = gr.Checkbox(label="20s", value=True)
-                            chunk_30s = gr.Checkbox(label="30s", value=True)
-                            chunk_45s = gr.Checkbox(label="45s", value=False)
+                            chunk_20s = gr.Checkbox(label="20s", value=False)
+                            chunk_30s = gr.Checkbox(label="30s", value=False)
+                            chunk_45s = gr.Checkbox(label="45s", value=True)
                             chunk_100s = gr.Checkbox(label="100s", value=False)
                             chunk_200s = gr.Checkbox(label="200s", value=False)
                             chunk_custom = gr.Checkbox(label="Custom", value=False)
@@ -142,7 +142,7 @@ def create_ai_optimize_tab():
                         with gr.Row():
                             overlap_0s = gr.Checkbox(label="0s", value=True)
                             overlap_1s = gr.Checkbox(label="1s", value=False)
-                            overlap_3s = gr.Checkbox(label="3s", value=True)
+                            overlap_3s = gr.Checkbox(label="3s", value=False)
                             overlap_5s = gr.Checkbox(label="5s", value=True)
                             overlap_10s = gr.Checkbox(label="10s", value=False)
                             overlap_15s = gr.Checkbox(label="15s", value=False)
@@ -167,25 +167,56 @@ def create_ai_optimize_tab():
                 
                 # Transcription options - Make visible by default
                 with gr.Row(visible=True) as transcription_options:
+                    # First column for Ollama model (50% width)
                     with gr.Column(scale=1):
-                        model_path = gr.Dropdown(
-                            label="Whisper Model",
-                            choices=[
-                                "/Users/macbook/audio_dataset/whisper.cpp/models/ggml-large-v3-turbo.bin",
-                                "models/ggml-base.en.bin",
-                                "models/ggml-small.en.bin",
-                                "models/ggml-medium.en.bin",
-                                "models/ggml-large.bin"
-                            ],
-                            value="/Users/macbook/audio_dataset/whisper.cpp/models/ggml-large-v3-turbo.bin",
-                            type="value"
+                        # Try to get available models from Ollama
+                        available_models = [
+                            "mistral",
+                            "mistral-small:24b-instruct-2501-q4_K_M",
+                            "llama3",
+                            "llama3:8b",
+                            "gemma2:9b",
+                            "phi3:mini",
+                        ]
+                        
+                        try:
+                            import subprocess
+                            result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
+                            if result.returncode == 0:
+                                models = []
+                                for line in result.stdout.strip().split("\n"):
+                                    if line.strip() and not line.startswith("NAME"):
+                                        parts = line.split()
+                                        if parts and parts[0] not in ["", "ID", "SIZE", "MODIFIED"]:
+                                            models.append(parts[0])
+                                if models:
+                                    available_models = models
+                        except Exception as e:
+                            logger.warning(f"Failed to get available Ollama models: {str(e)}")
+                        
+                        # Determine default model - use mistral-small:24b-instruct-2501-q4_K_M if available
+                        default_model = "mistral"
+                        preferred_model = "mistral-small:24b-instruct-2501-q4_K_M"
+                        if preferred_model in available_models:
+                            default_model = preferred_model
+                        elif available_models:
+                            default_model = available_models[0]
+                        
+                        model_dropdown = gr.Dropdown(
+                            label="Ollama Model",
+                            choices=available_models,
+                            value=default_model,
+                            type="value",
+                            interactive=True,
+                            info="Select the Ollama model to use for analysis"
                         )
                     
+                    # Second column for Language selection (50% width)
                     with gr.Column(scale=1):
                         language = gr.Dropdown(
                             label="Language",
                             choices=["English", "Korean", "Chinese", "Vietnamese", "Spanish"],
-                            value="English",
+                            value="Korean",
                             type="value",
                             interactive=True
                         )
@@ -196,7 +227,7 @@ def create_ai_optimize_tab():
                         use_prompt = gr.Radio(
                             label="Prompt Settings",
                             choices=["Don't use prompt", "Use Prompt"],
-                            value="Don't use prompt",
+                            value="Use Prompt",
                             type="value",
                             interactive=True
                         )
@@ -204,12 +235,24 @@ def create_ai_optimize_tab():
                     with gr.Column(scale=1):
                         prompt_length = gr.Number(
                             label="Prompt Length (characters)",
-                            value=200,
+                            value=80,
                             minimum=0,
                             maximum=1000,
                             step=50,
                             interactive=True,
-                            visible=False
+                            visible=True
+                        )
+                
+                # Add AI Prompt Language selection
+                with gr.Row(visible=True) as ai_prompt_language_row:
+                    with gr.Column():
+                        ai_prompt_language = gr.Radio(
+                            label="AI Prompt Language",
+                            choices=["Match Transcription", "English"],
+                            value="Match Transcription",
+                            type="value",
+                            interactive=True,
+                            info="Select which language to use for AI prompts. 'Match Transcription' will use the same language as the transcription, 'English' will always use English prompts."
                         )
                 
                 # Results display with tabs
@@ -245,48 +288,11 @@ def create_ai_optimize_tab():
                                 refresh_analysis_btn = gr.Button("Refresh Analysis Status", variant="secondary", scale=1)
                                 stop_analysis_btn = gr.Button("Stop Analysis", variant="stop", scale=1)
                             
-                            # Add model selector for Ollama
-                            with gr.Row():
-                                # Try to get available models from Ollama
-                                available_models = [
-                                    "mistral",
-                                    "mistral-small:24b-instruct-2501-q4_K_M",
-                                    "llama3",
-                                    "llama3:8b",
-                                    "gemma2:9b",
-                                    "phi3:mini",
-                                ]
-                                
-                                try:
-                                    import subprocess
-                                    result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
-                                    if result.returncode == 0:
-                                        models = []
-                                        for line in result.stdout.strip().split("\n"):
-                                            if line.strip() and not line.startswith("NAME"):
-                                                parts = line.split()
-                                                if parts and parts[0] not in ["", "ID", "SIZE", "MODIFIED"]:
-                                                    models.append(parts[0])
-                                        if models:
-                                            available_models = models
-                                except Exception as e:
-                                    logger.warning(f"Failed to get available Ollama models: {str(e)}")
-                                
-                                model_dropdown = gr.Dropdown(
-                                    label="Ollama Model",
-                                    choices=available_models,
-                                    value=available_models[0] if available_models else "mistral",
-                                    type="value",
-                                    interactive=True,
-                                    info="Select the Ollama model to use for analysis"
-                                )
-                            
                             analysis_text = gr.Textbox(
                                 label="AI Analysis Results",
                                 placeholder="Analysis results will appear here",
                                 lines=15,
-                                max_lines=40,
-                                max_length=4096,
+                                max_lines=30,
                                 interactive=False,
                                 show_copy_button=True
                             )
@@ -430,6 +436,12 @@ def create_ai_optimize_tab():
                                 # Status message for the charts
                                 charts_status = gr.Markdown("Click 'Refresh Charts' to load visualization data")
                                 
+                                # Add the category scores comparison section first
+                                gr.Markdown("#### Category Scores by Parameter Set")
+                                category_scores_plot = gr.Plot(
+                                    label="Comparison of Scores Across Categories"
+                                )
+                                
                                 # Main scatter plot showing all parameter sets
                                 gr.Markdown("#### Overview: All Parameter Sets")
                                 with gr.Row():
@@ -478,6 +490,154 @@ def create_ai_optimize_tab():
                                     label="Metrics Comparison"
                                 )
                                 
+                                # Function to create category scores comparison plot
+                                def create_category_scores_comparison():
+                                    try:
+                                        import matplotlib.pyplot as plt
+                                        import numpy as np
+                                        import pandas as pd
+                                        
+                                        # Find all analysis directories
+                                        analysis_dir = os.path.join("audio_ai_optimized", "analysis")
+                                        if not os.path.exists(analysis_dir):
+                                            return None
+                                            
+                                        # Find all parameter sets (combinations)
+                                        combinations = [d for d in os.listdir(analysis_dir) 
+                                                        if os.path.isdir(os.path.join(analysis_dir, d)) 
+                                                        and d.startswith("chunk")]
+                                        
+                                        if not combinations:
+                                            return None
+                                            
+                                        # Sort combinations by chunk length first, then by overlap
+                                        def extract_values(combo_name):
+                                            try:
+                                                chunk_length = int(combo_name.split('chunk')[1].split('s_overlap')[0])
+                                                overlap = int(combo_name.split('overlap')[1].split('s')[0])
+                                                return (chunk_length, overlap)
+                                            except:
+                                                return (999999, 999999)
+                                        
+                                        combinations.sort(key=extract_values)
+                                        
+                                        # Define metrics to compare
+                                        metrics = [
+                                            "verbatim_match_score",
+                                            "sentence_preservation_score",
+                                            "content_duplication_score",
+                                            "content_loss_score",
+                                            "join_transition_score",
+                                            "contextual_flow_score"
+                                        ]
+                                        
+                                        # Create readable metric names for x-axis
+                                        metric_names = {
+                                            "verbatim_match_score": "Verbatim\nMatch",
+                                            "sentence_preservation_score": "Sentence\nPreservation",
+                                            "content_duplication_score": "Content\nDuplication",
+                                            "content_loss_score": "Content\nLoss",
+                                            "join_transition_score": "Join\nTransition",
+                                            "contextual_flow_score": "Contextual\nFlow"
+                                        }
+                                        
+                                        # Set dark theme style
+                                        plt.style.use('dark_background')
+                                        
+                                        # Create figure with dark background
+                                        fig, ax = plt.subplots(figsize=(12, 8))
+                                        fig.patch.set_facecolor('#121212')  # Dark background for the figure
+                                        ax.set_facecolor('#1E1E1E')  # Slightly lighter dark background for the plot area
+                                        
+                                        # Define x positions and labels for the metrics
+                                        x_pos = list(range(len(metrics)))
+                                        x_labels = [metric_names[m] for m in metrics]
+                                        
+                                        # Markers and colors for different parameter sets - use brighter colors for dark background
+                                        markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'h']
+                                        # Use a colorful, bright palette for better visibility on dark background
+                                        colors = plt.cm.viridis(np.linspace(0, 0.9, len(combinations)))
+                                        
+                                        # Plot a line for each parameter set (combination)
+                                        legend_items = []
+                                        
+                                        for idx, combination in enumerate(combinations):
+                                            # Calculate average scores for this combination across all chunks
+                                            summary_file = os.path.join(analysis_dir, combination, "summary.json")
+                                            if not os.path.exists(summary_file):
+                                                continue
+                                                
+                                            # Load summary data
+                                            try:
+                                                with open(summary_file, 'r', encoding='utf-8') as f:
+                                                    summary_data = json.load(f)
+                                            except Exception as e:
+                                                logger.error(f"Error reading {summary_file}: {str(e)}")
+                                                continue
+                                            
+                                            # Initialize metric averages
+                                            metric_averages = {metric: 0 for metric in metrics}
+                                            count = 0
+                                            
+                                            # Calculate average scores across all chunks
+                                            if 'results' in summary_data:
+                                                # Calculate total for each metric
+                                                for chunk_result in summary_data['results']:
+                                                    if 'analysis_result' in chunk_result:
+                                                        analysis = chunk_result['analysis_result']
+                                                        for metric in metrics:
+                                                            if metric in analysis:
+                                                                metric_averages[metric] += analysis[metric]
+                                                        count += 1
+                                                
+                                                # Calculate average if we have data
+                                                if count > 0:
+                                                    for metric in metrics:
+                                                        metric_averages[metric] /= count
+                                                    
+                                                    # Extract values for plotting
+                                                    y_values = [metric_averages[metric] for metric in metrics]
+                                                    
+                                                    # Plot the line - make it thicker and brighter for dark theme
+                                                    line, = ax.plot(x_pos, y_values, marker=markers[idx % len(markers)], 
+                                                                    color=colors[idx], linewidth=2.5, markersize=10,
+                                                                    markeredgecolor='white', markeredgewidth=0.5)
+                                                    legend_items.append(line)
+                                            
+                                        # Set plot properties with light colors for text and grid
+                                        ax.set_title("Average Scores by Category Across Parameter Sets", 
+                                                    fontsize=18, color='white', fontweight='bold')
+                                        ax.set_ylim(0, 10.5)
+                                        ax.set_xticks(x_pos)
+                                        ax.set_xticklabels(x_labels, color='white', fontsize=12)
+                                        ax.set_ylabel("Average Score (0-10)", fontsize=14, color='white')
+                                        
+                                        # Style the axes and ticks
+                                        ax.spines['bottom'].set_color('#888888')
+                                        ax.spines['left'].set_color('#888888')
+                                        ax.spines['top'].set_color('#1E1E1E')
+                                        ax.spines['right'].set_color('#1E1E1E')
+                                        ax.tick_params(axis='both', colors='white')
+                                        
+                                        # Add grid with lighter color
+                                        ax.grid(True, linestyle='--', alpha=0.3, color='#888888')
+                                        
+                                        # Add horizontal line at score 5 for reference - more visible on dark background
+                                        ax.axhline(y=5, color='#AAAAAA', linestyle='--', alpha=0.7)
+                                        
+                                        # Add legend with light text
+                                        legend = ax.legend(legend_items, combinations, title="Parameter Sets", 
+                                                        loc='lower center', bbox_to_anchor=(0.5, -0.25), ncol=3)
+                                        legend.get_title().set_color('white')
+                                        for text in legend.get_texts():
+                                            text.set_color('white')
+                                        
+                                        plt.tight_layout()
+                                        return fig
+                                    except Exception as e:
+                                        logger.error(f"Error creating category scores comparison plot: {str(e)}")
+                                        return None
+
                                 # Function to update chunk detail plot based on selected combination
                                 def update_chunk_detail_plot(combination):
                                     if not combination:
@@ -741,6 +901,14 @@ def create_ai_optimize_tab():
                                     outputs=[metrics_line_plot]
                                 )
                                 
+                                # Add a refresh button for the category scores comparison plot
+                                refresh_category_scores_btn = gr.Button("Refresh Category Scores Comparison")
+                                refresh_category_scores_btn.click(
+                                    fn=create_category_scores_comparison,
+                                    inputs=[],
+                                    outputs=[category_scores_plot]
+                                )
+                                
                                 # Function to update the visualizations
                                 def update_charts():
                                     try:
@@ -779,12 +947,15 @@ def create_ai_optimize_tab():
                                             # Also update the chunk detail plot with the first combination
                                             chunk_plot = update_chunk_detail_plot(available_combinations[0])
                                             metrics_plot = create_metrics_line_plot(available_combinations[0])
+                                            # Add category scores comparison plot
+                                            category_scores = create_category_scores_comparison()
                                         else:
                                             chunk_plot = None
                                             metrics_plot = None
+                                            category_scores = None
                                         
                                         if summary_df is None:
-                                            return None, gr.Column(), dropdown_update, chunk_plot, metrics_dropdown_update, metrics_plot, f"⚠️ {status}"
+                                            return None, gr.Column(), dropdown_update, chunk_plot, metrics_dropdown_update, metrics_plot, category_scores, f"⚠️ {status}"
                                         
                                         # Create the individual plots container
                                         with gr.Column() as plots_container:
@@ -803,16 +974,16 @@ def create_ai_optimize_tab():
                                                         height=300
                                                     )
                                         
-                                        return summary_df, plots_container, dropdown_update, chunk_plot, metrics_dropdown_update, metrics_plot, f"✅ {status}"
+                                        return summary_df, plots_container, dropdown_update, chunk_plot, metrics_dropdown_update, metrics_plot, category_scores, f"✅ {status}"
                                     except Exception as e:
                                         logger.error(f"Error updating charts: {str(e)}")
-                                        return None, gr.Column(), gr.update(), None, gr.update(), None, f"⚠️ Error updating charts: {str(e)}"
+                                        return None, gr.Column(), gr.update(), None, gr.update(), None, None, f"⚠️ Error updating charts: {str(e)}"
                                 
                                 # Connect the refresh button
                                 refresh_charts_btn.click(
                                     fn=update_charts,
                                     inputs=[],
-                                    outputs=[overview_plot, individual_plots_container, combination_dropdown, chunk_detail_plot, metrics_combination_dropdown, metrics_line_plot, charts_status]
+                                    outputs=[overview_plot, individual_plots_container, combination_dropdown, chunk_detail_plot, metrics_combination_dropdown, metrics_line_plot, category_scores_plot, charts_status]
                                 )
                                 
                                 # Connect generate visualizations button
@@ -1263,7 +1434,8 @@ def create_ai_optimize_tab():
             # Initialize transcription service if needed
             if not transcription_service:
                 try:
-                    model_path_value = model_path.value
+                    # Using hardcoded path to whisper model since the selector was removed
+                    model_path_value = "/Users/macbook/audio_dataset/whisper.cpp/models/ggml-large-v3-turbo.bin"
                     transcription_service = TranscriptionService(model_path_value)
                 except Exception as e:
                     logger.error(f"Failed to initialize transcription service: {str(e)}")
@@ -2224,8 +2396,14 @@ def create_ai_optimize_tab():
         )
         
         # Function to analyze transcriptions
-        def analyze_transcriptions(model_name="mistral", combinations_to_analyze=None):
+        def analyze_transcriptions(model_name="mistral", language_name="English", ai_prompt_language="Match Transcription", *, combinations_to_analyze=None):
             global analyzer, is_analyzing, analysis_thread, stop_analysis
+            
+            # Add detailed debug logging for language selection
+            logger.warning(f"*** ANALYZE TRANSCRIPTIONS LANGUAGE DEBUG ***")
+            logger.warning(f"* Called with language_name: {language_name}")
+            logger.warning(f"* Type of language_name: {type(language_name)}")
+            logger.warning(f"* AI Prompt Language: {ai_prompt_language}")
             
             # Check if we're already analyzing
             if is_analyzing:
@@ -2233,6 +2411,25 @@ def create_ai_optimize_tab():
             
             # Reset stop flag when starting a new analysis
             stop_analysis = False
+            
+            # Map language name to code for prompt file selection
+            language_map = {
+                "English": "en",
+                "Korean": "ko",  # Changed from "kr" to "ko" to match ISO standard
+                "Chinese": "zh",
+                "Vietnamese": "vi",
+                "Spanish": "es"
+            }
+            language_code = language_map.get(language_name, "en")
+            logger.warning(f"* Mapped to language_code: {language_code}")
+            
+            # Check if we should override the language for AI prompts
+            if ai_prompt_language == "English":
+                logger.warning(f"* AI Prompt Language set to 'English', overriding prompt language")
+                language_code = "en"  # Always use English for prompts
+                logger.warning(f"* Final language_code for prompts: {language_code}")
+            else:
+                logger.warning(f"* AI Prompt Language set to 'Match Transcription', using transcription language: {language_code}")
             
             # Find the latest run directory if not provided
             if not os.path.exists(AUDIO_AI_OPTIMIZED_DIR):
@@ -2250,18 +2447,22 @@ def create_ai_optimize_tab():
             run_dirs.sort(reverse=True)
             latest_run_dir = os.path.join(AUDIO_AI_OPTIMIZED_DIR, run_dirs[0])
             
-            # Initialize analyzer with the selected model
+            # Initialize analyzer with the selected model and language
             model_name = model_name if model_name else "mistral"
-            logger.info(f"Initializing TranscriptionAnalyzer with model: {model_name}")
+            logger.info(f"Initializing TranscriptionAnalyzer with model: {model_name}, language: {language_code} (from {language_name})")
             
             try:
-                # Create the analyzer with the specified model
+                # Create the analyzer with the specified model and language
                 global analyzer
-                analyzer = TranscriptionAnalyzer(model_name=model_name)
-                logger.info(f"Successfully initialized analyzer with model: {model_name}")
+                analyzer = TranscriptionAnalyzer(model_name=model_name, language=language_code)
+                logger.info(f"Successfully initialized analyzer with model: {model_name}, language: {language_code}")
             except Exception as e:
                 error_msg = str(e)
-                logger.error(f"Error initializing analyzer with model '{model_name}': {error_msg}")
+                logger.error(f"Error initializing analyzer with model '{model_name}', language '{language_code}': {error_msg}")
+                
+                # Handle language-specific file not found errors
+                if "Prompt file for language" in error_msg and "not found" in error_msg:
+                    return f"Error: Prompt file for language '{language_name}' not found. Please ensure the file exists.", f"❌ Missing prompt file for {language_name}"
                 
                 # If the model was not found, suggest alternatives
                 if "model not found" in error_msg.lower() or "no such model" in error_msg.lower():
@@ -2488,16 +2689,6 @@ def create_ai_optimize_tab():
                                 # Analyze the chunk
                                 analysis_start_time = time.time()
                                 try:
-                                    analysis_result = loop.run_until_complete(
-                                        analyzer.analyze_chunk(
-                                            current_chunk=chunk_text,
-                                            previous_chunk=previous_chunk,
-                                            next_chunk=next_chunk,
-                                            prompt_used=prompt_used
-                                        )
-                                    )
-                                    analysis_duration = time.time() - analysis_start_time
-                                    
                                     # Extract chunk length and overlap from the combination name
                                     chunk_length = 0
                                     overlap_length = 0
@@ -2505,6 +2696,17 @@ def create_ai_optimize_tab():
                                     if chunk_match:
                                         chunk_length = int(chunk_match.group(1))
                                         overlap_length = int(chunk_match.group(2))
+                                    
+                                    analysis_result = loop.run_until_complete(
+                                        analyzer.analyze_chunk(
+                                            current_chunk=chunk_text,
+                                            previous_chunk=previous_chunk,
+                                            next_chunk=next_chunk,
+                                            prompt_used=prompt_used,
+                                            overlap_seconds=overlap_length
+                                        )
+                                    )
+                                    analysis_duration = time.time() - analysis_start_time
                                     
                                     # Get language information if available
                                     language = "unknown"
@@ -3149,7 +3351,7 @@ def create_ai_optimize_tab():
         # Add event handlers for analysis functions
         analyze_btn.click(
             analyze_transcriptions,
-            inputs=[model_dropdown],
+            inputs=[model_dropdown, language, ai_prompt_language],  # Added ai_prompt_language to the inputs
             outputs=[analysis_text, status_display]
         )
         

@@ -1,0 +1,139 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Audio Analysis Optimization Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1, h2, h3 { color: #333; }
+            .container { max-width: 1200px; margin: 0 auto; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            .chart-container { margin: 20px 0; text-align: center; }
+            .chart-container img { max-width: 100%; height: auto; }
+            .summary-card { 
+                border: 1px solid #ddd; 
+                border-radius: 5px; 
+                padding: 15px; 
+                margin-bottom: 20px;
+                background-color: #f9f9f9;
+            }
+            .score-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .score-box {
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 10px;
+                min-width: 120px;
+                text-align: center;
+            }
+            .score-high { background-color: #d4edda; }
+            .score-medium { background-color: #fff3cd; }
+            .score-low { background-color: #f8d7da; }
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 15px;
+                margin: 20px 0;
+            }
+            .stat-card {
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 15px;
+                background-color: #f9f9f9;
+                text-align: center;
+            }
+            .stat-value {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 10px 0;
+                color: #333;
+            }
+            .stat-title {
+                font-size: 14px;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Audio Analysis Optimization Report</h1>
+            <p>Generated on: 2025-03-05 15:13:07</p>
+            
+            <div class="summary-card">
+                <h2>Summary</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Average Score Across All Tests</div>
+                        <div class="stat-value">8.30</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Best Parameter Combination</div>
+                        <div class="stat-value">chunk20s_overlap1s</div>
+                        <div>8.86</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Total Parameter Combinations</div>
+                        <div class="stat-value">4</div>
+                    </div>
+                </div>
+                
+                <h3>Top Performing Combinations</h3>
+                <div class="score-container">
+                    
+            <div class="score-box score-high">
+                <h4>chunk20s_overlap1s</h4>
+                <div style="font-size: 18px;">8.86</div>
+            </div>
+            
+            <div class="score-box score-high">
+                <h4>chunk20s_overlap5s</h4>
+                <div style="font-size: 18px;">8.72</div>
+            </div>
+            
+            <div class="score-box score-high">
+                <h4>chunk45s_overlap1s</h4>
+                <div style="font-size: 18px;">8.24</div>
+            </div>
+            
+                </div>
+            </div>
+            
+            <h2>AI Analysis Results</h2>
+            <div class="chart-container">
+                <img src="category_scores_comparison.png" alt="Category Scores by Parameter Set">
+            </div>
+            
+            <h2>Processing Time Analysis</h2>
+            <div class="chart-container">
+                <img src="processing_times.png" alt="Processing Times">
+            </div>
+            
+            <h2>Parameter Performance Analysis</h2>
+            <div class="chart-container">
+                <img src="parameter_heatmap.png" alt="Parameter Performance Heatmap">
+            </div>
+            
+            <h2>Top Parameter Combinations</h2>
+            <div class="chart-container">
+                <img src="top_combinations.png" alt="Top Parameter Combinations">
+            </div>
+            
+            <h2>Chunk vs Overlap Analysis</h2>
+            <div class="chart-container">
+                <img src="chunk_overlap_scatter.png" alt="Chunk vs Overlap Analysis">
+            </div>
+            
+            <h2>Metrics Comparison</h2>
+            <div class="chart-container">
+                <img src="metrics_comparison.png" alt="Metrics Comparison">
+            </div>
+        </div>
+    </body>
+    </html>
+    

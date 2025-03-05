@@ -5,16 +5,14 @@
   "failed_analyses": 0,
   "retried_files": 0,
   "skipped_files": 0,
-  "overall_average_score": 6.54,
+  "overall_average_score": 7.28,
   "detailed_metrics": {
-    "overall_accuracy": 7.67,
-    "joint_smoothness": 4.67,
-    "contextual_continuity": 4.33,
-    "grammar_integrity": 8.0,
-    "word_completeness": 10.0,
-    "redundancy": 5.67,
-    "content_loss": 6.67,
-    "joint_readability": 5.33
+    "verbatim_match_score": 0.0,
+    "sentence_preservation_score": 7.67,
+    "content_duplication_score": 10.0,
+    "content_loss_score": 10.0,
+    "join_transition_score": 8.0,
+    "contextual_flow_score": 8.0
   },
-  "timestamp": "2025-02-28 19:07:54"
+  "timestamp": "2025-03-04 07:32:10"
 }

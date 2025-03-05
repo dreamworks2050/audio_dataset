@@ -3,21 +3,21 @@
     "chunk_number": 0,
     "filename": "chunk_0.wav",
     "audio_file": "sample_audio_1.wav",
-    "timestamp": "2025-02-28T19:06:35.932413",
-    "analysis_duration_seconds": 43.72,
+    "timestamp": "2025-03-04T07:31:05.186725",
+    "analysis_duration_seconds": 47.72,
     "retries": 0,
     "raw_response": {
-      "timestamp": "2025-02-28T19:06:35.930815",
+      "timestamp": "2025-03-04T07:31:05.185533",
       "model": "mistral-small:24b-instruct-2501-q4_K_M",
       "request": {
         "messages": [
           {
             "role": "system",
-            "content_preview": "You are a transcription quality analyzer. Your job is to analyze transcriptions and provide detailed..."
+            "content_preview": "You are a transcription quality analyzer focusing on the quality of joins between chunks. Your job i..."
           },
           {
             "role": "user",
-            "content_preview": "Analyze this FIRST transcription chunk and its connection to the next chunk. You MUST provide AT LEA..."
+            "content_preview": "Analyze this FIRST transcription chunk with a PRIMARY FOCUS on the quality of the join to the next c..."
           }
         ],
         "options": {
@@ -62,73 +62,57 @@
               "title": "Reasoning Steps",
               "type": "array"
             },
-            "overall_accuracy": {
-              "description": "How well the transcription matches the audio content",
+            "verbatim_match_score": {
+              "description": "How well the transcription content matches verbatim at the chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Overall Accuracy",
+              "title": "Verbatim Match Score",
               "type": "integer"
             },
-            "joint_smoothness": {
-              "description": "How seamless the transition is between chunks",
+            "sentence_preservation_score": {
+              "description": "How well sentences are preserved across chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Joint Smoothness",
+              "title": "Sentence Preservation Score",
               "type": "integer"
             },
-            "contextual_continuity": {
-              "description": "Whether meaning flows naturally across chunk boundaries",
+            "content_duplication_score": {
+              "description": "How much content is unnecessarily duplicated at chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Contextual Continuity",
+              "title": "Content Duplication Score",
               "type": "integer"
             },
-            "grammar_integrity": {
-              "description": "Whether sentences are properly maintained across chunk boundaries",
+            "content_loss_score": {
+              "description": "How much content is missing at chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Grammar Integrity",
+              "title": "Content Loss Score",
               "type": "integer"
             },
-            "word_completeness": {
-              "description": "Whether words are split or incomplete at the joints",
+            "join_transition_score": {
+              "description": "How smooth the transition is between chunks",
               "maximum": 10,
               "minimum": 0,
-              "title": "Word Completeness",
+              "title": "Join Transition Score",
               "type": "integer"
             },
-            "redundancy": {
-              "description": "Whether there is unnecessary repetition at the joints",
+            "contextual_flow_score": {
+              "description": "How well the meaning and context flow across chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Redundancy",
-              "type": "integer"
-            },
-            "content_loss": {
-              "description": "Whether any content is missing at the joints",
-              "maximum": 10,
-              "minimum": 0,
-              "title": "Content Loss",
-              "type": "integer"
-            },
-            "joint_readability": {
-              "description": "How readable the text is at the joint points",
-              "maximum": 10,
-              "minimum": 0,
-              "title": "Joint Readability",
+              "title": "Contextual Flow Score",
               "type": "integer"
             }
           },
           "required": [
             "reasoning_steps",
-            "overall_accuracy",
-            "joint_smoothness",
-            "contextual_continuity",
-            "grammar_integrity",
-            "word_completeness",
-            "redundancy",
-            "content_loss",
-            "joint_readability"
+            "verbatim_match_score",
+            "sentence_preservation_score",
+            "content_duplication_score",
+            "content_loss_score",
+            "join_transition_score",
+            "contextual_flow_score"
           ],
           "title": "GradingResult",
           "type": "object"
@@ -136,43 +120,43 @@
       },
       "response": {
         "model": "mistral-small:24b-instruct-2501-q4_K_M",
-        "created_at": "2025-02-28T10:06:35.929278Z",
+        "created_at": "2025-03-03T22:31:05.184851Z",
         "message": {
           "role": "assistant",
-          "content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The transcription chunks provided are extremely simple and do not contain any complex language or specific details that could be misinterpreted. The first chunk states: 'This is the first chunk of our sample transcription for testing.' This sentence is grammatically correct, clear, and accurately conveys its intended meaning. There are no typographical errors, missing words, or incorrect punctuation. Similarly, the second chunk states: 'This is the middle chunk that continues from the first one.' This sentence is also grammatically correct and clearly indicates a continuation of the transcription process. Since these chunks are basic placeholders rather than actual transcribed content, there's no way to assess how well they capture the nuances of spoken language or specific details from an audio source. However, as standalone sentences, both chunks are accurate and clear.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition between these two chunks is quite abrupt and lacks the natural flow expected in a real transcription. The first chunk ends with 'testing.' which is a complete sentence and provides no clear indication that more content will follow. The second chunk begins with 'This is the middle chunk...' without any transitional phrase or context that would create a smooth narrative progression from the first chunk. In a typical transcription, especially one involving spoken language, there would be some form of verbal cue or contextual overlap between chunks to indicate continuity. For example, a speaker might say something like 'As I mentioned earlier...' or 'Continuing with our discussion...'. Here, the lack of such transitional elements makes the flow feel disjointed and abrupt.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the next chunk\",\n      \"observation\": \"The content continuity between these two chunks is minimal at best. The first chunk simply states that it is the beginning of a transcription test, providing no specific details or context that would naturally lead into the second chunk. The second chunk then abruptly introduces itself as 'the middle chunk,' implying there should be more context or detail bridging these two statements. In an actual transcription, continuity would involve carrying over themes, ideas, or even specific words from one chunk to the next. For instance, if the first chunk ended with a discussion about a particular topic, the second chunk might begin by expanding on that topic. Here, there's no such thematic or contextual link; each chunk stands alone without reference to the other, resulting in poor continuity.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammatical integrity between these two chunks is excellent because both sentences are complete and grammatically correct. There's no issue with sentence fragments or incomplete thoughts at the boundary. However, this assessment is based solely on the textual content provided, which doesn't reflect real-world transcription challenges. In actual transcriptions, maintaining grammatical integrity across chunk boundaries often involves careful handling of interrupted speech patterns, false starts, and mid-sentence pauses. Since these chunks are simple and complete sentences, there's no opportunity to assess how well grammatical structure is maintained during more complex or interrupted speech.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness\",\n      \"observation\": \"The word completeness in this transcription is perfect. Both chunks contain complete words with no instances of partial words or syllables being split across the chunk boundary. This aspect is handled very well, ensuring that readers don't encounter confusing partial words that would disrupt comprehension.\"\n    }\n  ],\n  \"overall_accuracy\": 10,\n  \"joint_smoothness\": 2,\n  \"contextual_continuity\": 3,\n  \"grammar_integrity\": 10,\n  \"word_completeness\": 10,\n  \"redundancy\": 9,\n  \"content_loss\": 8,\n  \"joint_readability\": 4\n}"
+          "content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the end padding of this chunk with the start padding of the next chunk. Quote both texts.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' The exact text at the end of the current chunk and the beginning of the next chunk are not provided, but based on the instructions, we assume a 5-second overlap. Since the prompt does not include specific details about the overlap content, we cannot directly quote the padding texts.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Check if sentences starting in this chunk continue correctly in the next.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' Since there is no specific overlap text provided, we cannot verify sentence continuity directly. However, assuming a 5-second overlap, if the sentences are correctly continued, it would look something like this: Current end: 'for testing.' Next start: 'This is the middle chunk...' This suggests that the join might be smooth but lacks direct evidence.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Look for unnecessary duplication at the join.\",\n      \"observation\": \"Without specific overlap text, it's impossible to determine if there is any unnecessary duplication. However, assuming proper chunking with a 5-second padding, duplication should be minimal and limited to the overlap region.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Identify any content loss at the join.\",\n      \"observation\": \"Again, without specific overlap text, it's impossible to determine if there is any content loss. Assuming proper chunking with a 5-second padding, content loss should be minimal and limited to the overlap region.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Read across the join aloud.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' If read aloud, it seems like there might be a slight pause or break between the two chunks, but without specific overlap text, this cannot be confirmed.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Assess the contextual flow.\",\n      \"observation\": \"Based on the provided texts, the context seems to shift from one chunk to another. The first chunk is about a sample transcription for testing, while the second chunk indicates a continuation but does not directly relate to the content of the first chunk. This suggests there might be a noticeable shift in context.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 5,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 5\n}"
         },
         "done_reason": "stop",
         "done": true,
-        "total_duration": 43695534375,
-        "load_duration": 11117709,
-        "prompt_eval_count": 1450,
-        "prompt_eval_duration": 7028000000,
-        "eval_count": 863,
-        "eval_duration": 36647000000
+        "total_duration": 47706026833,
+        "load_duration": 10398416,
+        "prompt_eval_count": 1563,
+        "prompt_eval_duration": 12142000000,
+        "eval_count": 675,
+        "eval_duration": 35542000000
       },
-      "original_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The transcription chunks provided are extremely simple and do not contain any complex language or specific details that could be misinterpreted. The first chunk states: 'This is the first chunk of our sample transcription for testing.' This sentence is grammatically correct, clear, and accurately conveys its intended meaning. There are no typographical errors, missing words, or incorrect punctuation. Similarly, the second chunk states: 'This is the middle chunk that continues from the first one.' This sentence is also grammatically correct and clearly indicates a continuation of the transcription process. Since these chunks are basic placeholders rather than actual transcribed content, there's no way to assess how well they capture the nuances of spoken language or specific details from an audio source. However, as standalone sentences, both chunks are accurate and clear.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition between these two chunks is quite abrupt and lacks the natural flow expected in a real transcription. The first chunk ends with 'testing.' which is a complete sentence and provides no clear indication that more content will follow. The second chunk begins with 'This is the middle chunk...' without any transitional phrase or context that would create a smooth narrative progression from the first chunk. In a typical transcription, especially one involving spoken language, there would be some form of verbal cue or contextual overlap between chunks to indicate continuity. For example, a speaker might say something like 'As I mentioned earlier...' or 'Continuing with our discussion...'. Here, the lack of such transitional elements makes the flow feel disjointed and abrupt.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the next chunk\",\n      \"observation\": \"The content continuity between these two chunks is minimal at best. The first chunk simply states that it is the beginning of a transcription test, providing no specific details or context that would naturally lead into the second chunk. The second chunk then abruptly introduces itself as 'the middle chunk,' implying there should be more context or detail bridging these two statements. In an actual transcription, continuity would involve carrying over themes, ideas, or even specific words from one chunk to the next. For instance, if the first chunk ended with a discussion about a particular topic, the second chunk might begin by expanding on that topic. Here, there's no such thematic or contextual link; each chunk stands alone without reference to the other, resulting in poor continuity.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammatical integrity between these two chunks is excellent because both sentences are complete and grammatically correct. There's no issue with sentence fragments or incomplete thoughts at the boundary. However, this assessment is based solely on the textual content provided, which doesn't reflect real-world transcription challenges. In actual transcriptions, maintaining grammatical integrity across chunk boundaries often involves careful handling of interrupted speech patterns, false starts, and mid-sentence pauses. Since these chunks are simple and complete sentences, there's no opportunity to assess how well grammatical structure is maintained during more complex or interrupted speech.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness\",\n      \"observation\": \"The word completeness in this transcription is perfect. Both chunks contain complete words with no instances of partial words or syllables being split across the chunk boundary. This aspect is handled very well, ensuring that readers don't encounter confusing partial words that would disrupt comprehension.\"\n    }\n  ],\n  \"overall_accuracy\": 10,\n  \"joint_smoothness\": 2,\n  \"contextual_continuity\": 3,\n  \"grammar_integrity\": 10,\n  \"word_completeness\": 10,\n  \"redundancy\": 9,\n  \"content_loss\": 8,\n  \"joint_readability\": 4\n}"
+      "original_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the end padding of this chunk with the start padding of the next chunk. Quote both texts.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' The exact text at the end of the current chunk and the beginning of the next chunk are not provided, but based on the instructions, we assume a 5-second overlap. Since the prompt does not include specific details about the overlap content, we cannot directly quote the padding texts.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Check if sentences starting in this chunk continue correctly in the next.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' Since there is no specific overlap text provided, we cannot verify sentence continuity directly. However, assuming a 5-second overlap, if the sentences are correctly continued, it would look something like this: Current end: 'for testing.' Next start: 'This is the middle chunk...' This suggests that the join might be smooth but lacks direct evidence.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Look for unnecessary duplication at the join.\",\n      \"observation\": \"Without specific overlap text, it's impossible to determine if there is any unnecessary duplication. However, assuming proper chunking with a 5-second padding, duplication should be minimal and limited to the overlap region.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Identify any content loss at the join.\",\n      \"observation\": \"Again, without specific overlap text, it's impossible to determine if there is any content loss. Assuming proper chunking with a 5-second padding, content loss should be minimal and limited to the overlap region.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Read across the join aloud.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' If read aloud, it seems like there might be a slight pause or break between the two chunks, but without specific overlap text, this cannot be confirmed.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Assess the contextual flow.\",\n      \"observation\": \"Based on the provided texts, the context seems to shift from one chunk to another. The first chunk is about a sample transcription for testing, while the second chunk indicates a continuation but does not directly relate to the content of the first chunk. This suggests there might be a noticeable shift in context.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 5,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 5\n}"
     },
-    "original_model_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The transcription chunks provided are extremely simple and do not contain any complex language or specific details that could be misinterpreted. The first chunk states: 'This is the first chunk of our sample transcription for testing.' This sentence is grammatically correct, clear, and accurately conveys its intended meaning. There are no typographical errors, missing words, or incorrect punctuation. Similarly, the second chunk states: 'This is the middle chunk that continues from the first one.' This sentence is also grammatically correct and clearly indicates a continuation of the transcription process. Since these chunks are basic placeholders rather than actual transcribed content, there's no way to assess how well they capture the nuances of spoken language or specific details from an audio source. However, as standalone sentences, both chunks are accurate and clear.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition between these two chunks is quite abrupt and lacks the natural flow expected in a real transcription. The first chunk ends with 'testing.' which is a complete sentence and provides no clear indication that more content will follow. The second chunk begins with 'This is the middle chunk...' without any transitional phrase or context that would create a smooth narrative progression from the first chunk. In a typical transcription, especially one involving spoken language, there would be some form of verbal cue or contextual overlap between chunks to indicate continuity. For example, a speaker might say something like 'As I mentioned earlier...' or 'Continuing with our discussion...'. Here, the lack of such transitional elements makes the flow feel disjointed and abrupt.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the next chunk\",\n      \"observation\": \"The content continuity between these two chunks is minimal at best. The first chunk simply states that it is the beginning of a transcription test, providing no specific details or context that would naturally lead into the second chunk. The second chunk then abruptly introduces itself as 'the middle chunk,' implying there should be more context or detail bridging these two statements. In an actual transcription, continuity would involve carrying over themes, ideas, or even specific words from one chunk to the next. For instance, if the first chunk ended with a discussion about a particular topic, the second chunk might begin by expanding on that topic. Here, there's no such thematic or contextual link; each chunk stands alone without reference to the other, resulting in poor continuity.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammatical integrity between these two chunks is excellent because both sentences are complete and grammatically correct. There's no issue with sentence fragments or incomplete thoughts at the boundary. However, this assessment is based solely on the textual content provided, which doesn't reflect real-world transcription challenges. In actual transcriptions, maintaining grammatical integrity across chunk boundaries often involves careful handling of interrupted speech patterns, false starts, and mid-sentence pauses. Since these chunks are simple and complete sentences, there's no opportunity to assess how well grammatical structure is maintained during more complex or interrupted speech.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness\",\n      \"observation\": \"The word completeness in this transcription is perfect. Both chunks contain complete words with no instances of partial words or syllables being split across the chunk boundary. This aspect is handled very well, ensuring that readers don't encounter confusing partial words that would disrupt comprehension.\"\n    }\n  ],\n  \"overall_accuracy\": 10,\n  \"joint_smoothness\": 2,\n  \"contextual_continuity\": 3,\n  \"grammar_integrity\": 10,\n  \"word_completeness\": 10,\n  \"redundancy\": 9,\n  \"content_loss\": 8,\n  \"joint_readability\": 4\n}"
+    "original_model_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the end padding of this chunk with the start padding of the next chunk. Quote both texts.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' The exact text at the end of the current chunk and the beginning of the next chunk are not provided, but based on the instructions, we assume a 5-second overlap. Since the prompt does not include specific details about the overlap content, we cannot directly quote the padding texts.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Check if sentences starting in this chunk continue correctly in the next.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' Since there is no specific overlap text provided, we cannot verify sentence continuity directly. However, assuming a 5-second overlap, if the sentences are correctly continued, it would look something like this: Current end: 'for testing.' Next start: 'This is the middle chunk...' This suggests that the join might be smooth but lacks direct evidence.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Look for unnecessary duplication at the join.\",\n      \"observation\": \"Without specific overlap text, it's impossible to determine if there is any unnecessary duplication. However, assuming proper chunking with a 5-second padding, duplication should be minimal and limited to the overlap region.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Identify any content loss at the join.\",\n      \"observation\": \"Again, without specific overlap text, it's impossible to determine if there is any content loss. Assuming proper chunking with a 5-second padding, content loss should be minimal and limited to the overlap region.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Read across the join aloud.\",\n      \"observation\": \"Current end: 'This is the first chunk of our sample transcription for testing.' Next start: 'This is the middle chunk that continues from the first one.' If read aloud, it seems like there might be a slight pause or break between the two chunks, but without specific overlap text, this cannot be confirmed.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Assess the contextual flow.\",\n      \"observation\": \"Based on the provided texts, the context seems to shift from one chunk to another. The first chunk is about a sample transcription for testing, while the second chunk indicates a continuation but does not directly relate to the content of the first chunk. This suggests there might be a noticeable shift in context.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 5,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 5\n}"
   },
   {
     "chunk_number": 1,
     "filename": "chunk_1.wav",
     "audio_file": "sample_audio_1.wav",
-    "timestamp": "2025-02-28T19:07:15.861002",
-    "analysis_duration_seconds": 39.93,
+    "timestamp": "2025-03-04T07:31:41.897004",
+    "analysis_duration_seconds": 36.71,
     "retries": 0,
     "raw_response": {
-      "timestamp": "2025-02-28T19:07:15.859625",
+      "timestamp": "2025-03-04T07:31:41.896161",
       "model": "mistral-small:24b-instruct-2501-q4_K_M",
       "request": {
         "messages": [
           {
             "role": "system",
-            "content_preview": "You are a transcription quality analyzer. Your job is to analyze transcriptions and provide detailed..."
+            "content_preview": "You are a transcription quality analyzer focusing on the quality of joins between chunks. Your job i..."
           },
           {
             "role": "user",
-            "content_preview": "Analyze this transcription chunk and its connections to neighboring chunks. You MUST provide AT LEAS..."
+            "content_preview": "Analyze this transcription chunk with a PRIMARY FOCUS on the quality of the joins to neighboring chu..."
           }
         ],
         "options": {
@@ -217,73 +201,57 @@
               "title": "Reasoning Steps",
               "type": "array"
             },
-            "overall_accuracy": {
-              "description": "How well the transcription matches the audio content",
+            "verbatim_match_score": {
+              "description": "How well the transcription content matches verbatim at the chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Overall Accuracy",
+              "title": "Verbatim Match Score",
               "type": "integer"
             },
-            "joint_smoothness": {
-              "description": "How seamless the transition is between chunks",
+            "sentence_preservation_score": {
+              "description": "How well sentences are preserved across chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Joint Smoothness",
+              "title": "Sentence Preservation Score",
               "type": "integer"
             },
-            "contextual_continuity": {
-              "description": "Whether meaning flows naturally across chunk boundaries",
+            "content_duplication_score": {
+              "description": "How much content is unnecessarily duplicated at chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Contextual Continuity",
+              "title": "Content Duplication Score",
               "type": "integer"
             },
-            "grammar_integrity": {
-              "description": "Whether sentences are properly maintained across chunk boundaries",
+            "content_loss_score": {
+              "description": "How much content is missing at chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Grammar Integrity",
+              "title": "Content Loss Score",
               "type": "integer"
             },
-            "word_completeness": {
-              "description": "Whether words are split or incomplete at the joints",
+            "join_transition_score": {
+              "description": "How smooth the transition is between chunks",
               "maximum": 10,
               "minimum": 0,
-              "title": "Word Completeness",
+              "title": "Join Transition Score",
               "type": "integer"
             },
-            "redundancy": {
-              "description": "Whether there is unnecessary repetition at the joints",
+            "contextual_flow_score": {
+              "description": "How well the meaning and context flow across chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Redundancy",
-              "type": "integer"
-            },
-            "content_loss": {
-              "description": "Whether any content is missing at the joints",
-              "maximum": 10,
-              "minimum": 0,
-              "title": "Content Loss",
-              "type": "integer"
-            },
-            "joint_readability": {
-              "description": "How readable the text is at the joint points",
-              "maximum": 10,
-              "minimum": 0,
-              "title": "Joint Readability",
+              "title": "Contextual Flow Score",
               "type": "integer"
             }
           },
           "required": [
             "reasoning_steps",
-            "overall_accuracy",
-            "joint_smoothness",
-            "contextual_continuity",
-            "grammar_integrity",
-            "word_completeness",
-            "redundancy",
-            "content_loss",
-            "joint_readability"
+            "verbatim_match_score",
+            "sentence_preservation_score",
+            "content_duplication_score",
+            "content_loss_score",
+            "join_transition_score",
+            "contextual_flow_score"
           ],
           "title": "GradingResult",
           "type": "object"
@@ -291,43 +259,43 @@
       },
       "response": {
         "model": "mistral-small:24b-instruct-2501-q4_K_M",
-        "created_at": "2025-02-28T10:07:15.858422Z",
+        "created_at": "2025-03-03T22:31:41.895442Z",
         "message": {
           "role": "assistant",
-          "content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The transcription appears straightforward and accurate in terms of content, with each chunk clearly conveying its intended message. The current chunk explicitly states 'This is the middle chunk that continues from the first one,' which accurately describes its role in the sequence. There are no noticeable errors or omissions in the text itself; all words are spelled correctly, and the sentences are grammatically sound. However, there's a lack of specific content that would allow for a deeper analysis of accuracy, as the text is more about structural placement than substantive information.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition between sentences within each chunk is smooth and logical. However, the flow between chunks is less apparent due to the generic nature of the content. The current chunk begins with 'This is the middle chunk that continues from the first one,' which logically follows from the previous chunk's ending. There are no abrupt changes in topic or perspective within any chunk. Each sentence flows naturally into the next, maintaining a consistent tone and structure. The text maintains a clear and concise style, making it easy to read despite the lack of substantive content.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the neighboring chunks\",\n      \"observation\": \"The contextual continuity between the current chunk and its neighbors is evident but limited by the generic nature of the content. The previous chunk ends with 'This is the first chunk of our sample transcription for testing,' which sets up the expectation for subsequent chunks. The current chunk begins with 'This is the middle chunk that continues from the first one,' clearly indicating its role in the sequence. The next chunk starts with 'This is the final chunk that concludes our transcription,' which logically follows from the current chunk's ending. There are no abrupt changes in topic or perspective, and each chunk builds on the previous one to create a coherent whole.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammar integrity between chunks is excellent. Each chunk ends with a complete sentence that logically sets up the next chunk. There are no grammatical errors or incomplete sentences at the boundaries. For example, the previous chunk ends with 'This is the first chunk of our sample transcription for testing,' which is a complete sentence. The current chunk begins with 'This is the middle chunk that continues from the first one,' which is also a complete sentence and logically follows from the previous one. There are no issues with subject-verb agreement, tense consistency, or other grammatical structures.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness across chunk boundaries\",\n      \"observation\": \"The word completeness across chunk boundaries is perfect. Each chunk ends and begins with complete words, ensuring that there are no partial words or syllables split across the boundaries. For example, the previous chunk ends with 'testing,' which is a complete word. The current chunk begins with 'This,' which is also a complete word. There are no instances of words being cut off mid-word, which would disrupt comprehension.\"\n    }\n  ],\n  \"overall_accuracy\": 8,\n  \"joint_smoothness\": 9,\n  \"contextual_continuity\": 8,\n  \"grammar_integrity\": 10,\n  \"word_completeness\": 10,\n  \"redundancy\": 2, \"content_loss\": 5,\n  \"joint_readability\": 8\n}"
+          "content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the end padding of the previous chunk with the start padding of the current chunk. Quote both texts.\",\n      \"observation\": \"Previous end: 'This is the first chunk of our sample transcription for testing.' Current start: 'This is the middle chunk that continues from the first one.' There are no verbatim overlaps, but logically it seems continuous.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Compare the end padding of the current chunk with the start padding of the next chunk. Quote both texts.\",\n      \"observation\": \"Current end: 'This is the middle chunk that continues from the first one.' Next start: 'This is the final chunk that concludes our transcription.' Again, no verbatim overlaps, but logically it seems continuous.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Identify any sentence split across joins (previous-to-current or current-to-next). Quote the sentence parts and check if they connect correctly.\",\n      \"observation\": \"Previous-to-current: 'This is the first chunk of our sample transcription for testing.' + 'This is the middle chunk that continues from the first one.' This seems like a logical continuation but not a direct split sentence. Current-to-next: 'This is the middle chunk that continues from the first one.' + 'This is the final chunk that concludes our transcription.' Similarly, this is logically continuous but no direct sentence split.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Examine the joins for unnecessary duplication beyond the overlap. Quote any repeated text and determine if it\u2019s excessive.\",\n      \"observation\": \"There is no duplication beyond the expected logical continuity between chunks.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Check for content loss at each join. Quote text around the join to highlight missing elements.\",\n      \"observation\": \"No content seems to be lost at either join, as the transitions are logically continuous and complete.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Read across both joins aloud (previous-to-current and current-to-next). Quote the transition text and assess smoothness and contextual coherence.\",\n      \"observation\": \"Reading 'This is the first chunk of our sample transcription for testing. This is the middle chunk that continues from the first one.' feels smooth, as does reading 'This is the middle chunk that continues from the first one. This is the final chunk that concludes our transcription.' Both transitions are coherent and maintain contextual flow.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 8,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 10\n}"
         },
         "done_reason": "stop",
         "done": true,
-        "total_duration": 39899602917,
-        "load_duration": 10881542,
-        "prompt_eval_count": 1469,
-        "prompt_eval_duration": 6551000000,
-        "eval_count": 781,
-        "eval_duration": 33329000000
+        "total_duration": 36680341292,
+        "load_duration": 10399917,
+        "prompt_eval_count": 1857,
+        "prompt_eval_duration": 8392000000,
+        "eval_count": 619,
+        "eval_duration": 28266000000
       },
-      "original_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The transcription appears straightforward and accurate in terms of content, with each chunk clearly conveying its intended message. The current chunk explicitly states 'This is the middle chunk that continues from the first one,' which accurately describes its role in the sequence. There are no noticeable errors or omissions in the text itself; all words are spelled correctly, and the sentences are grammatically sound. However, there's a lack of specific content that would allow for a deeper analysis of accuracy, as the text is more about structural placement than substantive information.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition between sentences within each chunk is smooth and logical. However, the flow between chunks is less apparent due to the generic nature of the content. The current chunk begins with 'This is the middle chunk that continues from the first one,' which logically follows from the previous chunk's ending. There are no abrupt changes in topic or perspective within any chunk. Each sentence flows naturally into the next, maintaining a consistent tone and structure. The text maintains a clear and concise style, making it easy to read despite the lack of substantive content.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the neighboring chunks\",\n      \"observation\": \"The contextual continuity between the current chunk and its neighbors is evident but limited by the generic nature of the content. The previous chunk ends with 'This is the first chunk of our sample transcription for testing,' which sets up the expectation for subsequent chunks. The current chunk begins with 'This is the middle chunk that continues from the first one,' clearly indicating its role in the sequence. The next chunk starts with 'This is the final chunk that concludes our transcription,' which logically follows from the current chunk's ending. There are no abrupt changes in topic or perspective, and each chunk builds on the previous one to create a coherent whole.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammar integrity between chunks is excellent. Each chunk ends with a complete sentence that logically sets up the next chunk. There are no grammatical errors or incomplete sentences at the boundaries. For example, the previous chunk ends with 'This is the first chunk of our sample transcription for testing,' which is a complete sentence. The current chunk begins with 'This is the middle chunk that continues from the first one,' which is also a complete sentence and logically follows from the previous one. There are no issues with subject-verb agreement, tense consistency, or other grammatical structures.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness across chunk boundaries\",\n      \"observation\": \"The word completeness across chunk boundaries is perfect. Each chunk ends and begins with complete words, ensuring that there are no partial words or syllables split across the boundaries. For example, the previous chunk ends with 'testing,' which is a complete word. The current chunk begins with 'This,' which is also a complete word. There are no instances of words being cut off mid-word, which would disrupt comprehension.\"\n    }\n  ],\n  \"overall_accuracy\": 8,\n  \"joint_smoothness\": 9,\n  \"contextual_continuity\": 8,\n  \"grammar_integrity\": 10,\n  \"word_completeness\": 10,\n  \"redundancy\": 2, \"content_loss\": 5,\n  \"joint_readability\": 8\n}"
+      "original_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the end padding of the previous chunk with the start padding of the current chunk. Quote both texts.\",\n      \"observation\": \"Previous end: 'This is the first chunk of our sample transcription for testing.' Current start: 'This is the middle chunk that continues from the first one.' There are no verbatim overlaps, but logically it seems continuous.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Compare the end padding of the current chunk with the start padding of the next chunk. Quote both texts.\",\n      \"observation\": \"Current end: 'This is the middle chunk that continues from the first one.' Next start: 'This is the final chunk that concludes our transcription.' Again, no verbatim overlaps, but logically it seems continuous.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Identify any sentence split across joins (previous-to-current or current-to-next). Quote the sentence parts and check if they connect correctly.\",\n      \"observation\": \"Previous-to-current: 'This is the first chunk of our sample transcription for testing.' + 'This is the middle chunk that continues from the first one.' This seems like a logical continuation but not a direct split sentence. Current-to-next: 'This is the middle chunk that continues from the first one.' + 'This is the final chunk that concludes our transcription.' Similarly, this is logically continuous but no direct sentence split.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Examine the joins for unnecessary duplication beyond the overlap. Quote any repeated text and determine if it\u2019s excessive.\",\n      \"observation\": \"There is no duplication beyond the expected logical continuity between chunks.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Check for content loss at each join. Quote text around the join to highlight missing elements.\",\n      \"observation\": \"No content seems to be lost at either join, as the transitions are logically continuous and complete.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Read across both joins aloud (previous-to-current and current-to-next). Quote the transition text and assess smoothness and contextual coherence.\",\n      \"observation\": \"Reading 'This is the first chunk of our sample transcription for testing. This is the middle chunk that continues from the first one.' feels smooth, as does reading 'This is the middle chunk that continues from the first one. This is the final chunk that concludes our transcription.' Both transitions are coherent and maintain contextual flow.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 8,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 10\n}"
     },
-    "original_model_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The transcription appears straightforward and accurate in terms of content, with each chunk clearly conveying its intended message. The current chunk explicitly states 'This is the middle chunk that continues from the first one,' which accurately describes its role in the sequence. There are no noticeable errors or omissions in the text itself; all words are spelled correctly, and the sentences are grammatically sound. However, there's a lack of specific content that would allow for a deeper analysis of accuracy, as the text is more about structural placement than substantive information.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition between sentences within each chunk is smooth and logical. However, the flow between chunks is less apparent due to the generic nature of the content. The current chunk begins with 'This is the middle chunk that continues from the first one,' which logically follows from the previous chunk's ending. There are no abrupt changes in topic or perspective within any chunk. Each sentence flows naturally into the next, maintaining a consistent tone and structure. The text maintains a clear and concise style, making it easy to read despite the lack of substantive content.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the neighboring chunks\",\n      \"observation\": \"The contextual continuity between the current chunk and its neighbors is evident but limited by the generic nature of the content. The previous chunk ends with 'This is the first chunk of our sample transcription for testing,' which sets up the expectation for subsequent chunks. The current chunk begins with 'This is the middle chunk that continues from the first one,' clearly indicating its role in the sequence. The next chunk starts with 'This is the final chunk that concludes our transcription,' which logically follows from the current chunk's ending. There are no abrupt changes in topic or perspective, and each chunk builds on the previous one to create a coherent whole.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammar integrity between chunks is excellent. Each chunk ends with a complete sentence that logically sets up the next chunk. There are no grammatical errors or incomplete sentences at the boundaries. For example, the previous chunk ends with 'This is the first chunk of our sample transcription for testing,' which is a complete sentence. The current chunk begins with 'This is the middle chunk that continues from the first one,' which is also a complete sentence and logically follows from the previous one. There are no issues with subject-verb agreement, tense consistency, or other grammatical structures.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness across chunk boundaries\",\n      \"observation\": \"The word completeness across chunk boundaries is perfect. Each chunk ends and begins with complete words, ensuring that there are no partial words or syllables split across the boundaries. For example, the previous chunk ends with 'testing,' which is a complete word. The current chunk begins with 'This,' which is also a complete word. There are no instances of words being cut off mid-word, which would disrupt comprehension.\"\n    }\n  ],\n  \"overall_accuracy\": 8,\n  \"joint_smoothness\": 9,\n  \"contextual_continuity\": 8,\n  \"grammar_integrity\": 10,\n  \"word_completeness\": 10,\n  \"redundancy\": 2, \"content_loss\": 5,\n  \"joint_readability\": 8\n}"
+    "original_model_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the end padding of the previous chunk with the start padding of the current chunk. Quote both texts.\",\n      \"observation\": \"Previous end: 'This is the first chunk of our sample transcription for testing.' Current start: 'This is the middle chunk that continues from the first one.' There are no verbatim overlaps, but logically it seems continuous.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Compare the end padding of the current chunk with the start padding of the next chunk. Quote both texts.\",\n      \"observation\": \"Current end: 'This is the middle chunk that continues from the first one.' Next start: 'This is the final chunk that concludes our transcription.' Again, no verbatim overlaps, but logically it seems continuous.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Identify any sentence split across joins (previous-to-current or current-to-next). Quote the sentence parts and check if they connect correctly.\",\n      \"observation\": \"Previous-to-current: 'This is the first chunk of our sample transcription for testing.' + 'This is the middle chunk that continues from the first one.' This seems like a logical continuation but not a direct split sentence. Current-to-next: 'This is the middle chunk that continues from the first one.' + 'This is the final chunk that concludes our transcription.' Similarly, this is logically continuous but no direct sentence split.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Examine the joins for unnecessary duplication beyond the overlap. Quote any repeated text and determine if it\u2019s excessive.\",\n      \"observation\": \"There is no duplication beyond the expected logical continuity between chunks.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Check for content loss at each join. Quote text around the join to highlight missing elements.\",\n      \"observation\": \"No content seems to be lost at either join, as the transitions are logically continuous and complete.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Read across both joins aloud (previous-to-current and current-to-next). Quote the transition text and assess smoothness and contextual coherence.\",\n      \"observation\": \"Reading 'This is the first chunk of our sample transcription for testing. This is the middle chunk that continues from the first one.' feels smooth, as does reading 'This is the middle chunk that continues from the first one. This is the final chunk that concludes our transcription.' Both transitions are coherent and maintain contextual flow.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 8,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 10\n}"
   },
   {
     "chunk_number": 2,
     "filename": "chunk_2.wav",
     "audio_file": "sample_audio_1.wav",
-    "timestamp": "2025-02-28T19:07:54.217127",
-    "analysis_duration_seconds": 38.35,
+    "timestamp": "2025-03-04T07:32:10.523747",
+    "analysis_duration_seconds": 28.63,
     "retries": 0,
     "raw_response": {
-      "timestamp": "2025-02-28T19:07:54.216581",
+      "timestamp": "2025-03-04T07:32:10.523082",
       "model": "mistral-small:24b-instruct-2501-q4_K_M",
       "request": {
         "messages": [
           {
             "role": "system",
-            "content_preview": "You are a transcription quality analyzer. Your job is to analyze transcriptions and provide detailed..."
+            "content_preview": "You are a transcription quality analyzer focusing on the quality of joins between chunks. Your job i..."
           },
           {
             "role": "user",
-            "content_preview": "Analyze this LAST transcription chunk and its connection to the previous chunk. You MUST provide AT ..."
+            "content_preview": "Analyze this LAST transcription chunk with a PRIMARY FOCUS on the quality of the join from the previ..."
           }
         ],
         "options": {
@@ -372,73 +340,57 @@
               "title": "Reasoning Steps",
               "type": "array"
             },
-            "overall_accuracy": {
-              "description": "How well the transcription matches the audio content",
+            "verbatim_match_score": {
+              "description": "How well the transcription content matches verbatim at the chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Overall Accuracy",
+              "title": "Verbatim Match Score",
               "type": "integer"
             },
-            "joint_smoothness": {
-              "description": "How seamless the transition is between chunks",
+            "sentence_preservation_score": {
+              "description": "How well sentences are preserved across chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Joint Smoothness",
+              "title": "Sentence Preservation Score",
               "type": "integer"
             },
-            "contextual_continuity": {
-              "description": "Whether meaning flows naturally across chunk boundaries",
+            "content_duplication_score": {
+              "description": "How much content is unnecessarily duplicated at chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Contextual Continuity",
+              "title": "Content Duplication Score",
               "type": "integer"
             },
-            "grammar_integrity": {
-              "description": "Whether sentences are properly maintained across chunk boundaries",
+            "content_loss_score": {
+              "description": "How much content is missing at chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Grammar Integrity",
+              "title": "Content Loss Score",
               "type": "integer"
             },
-            "word_completeness": {
-              "description": "Whether words are split or incomplete at the joints",
+            "join_transition_score": {
+              "description": "How smooth the transition is between chunks",
               "maximum": 10,
               "minimum": 0,
-              "title": "Word Completeness",
+              "title": "Join Transition Score",
               "type": "integer"
             },
-            "redundancy": {
-              "description": "Whether there is unnecessary repetition at the joints",
+            "contextual_flow_score": {
+              "description": "How well the meaning and context flow across chunk boundaries",
               "maximum": 10,
               "minimum": 0,
-              "title": "Redundancy",
-              "type": "integer"
-            },
-            "content_loss": {
-              "description": "Whether any content is missing at the joints",
-              "maximum": 10,
-              "minimum": 0,
-              "title": "Content Loss",
-              "type": "integer"
-            },
-            "joint_readability": {
-              "description": "How readable the text is at the joint points",
-              "maximum": 10,
-              "minimum": 0,
-              "title": "Joint Readability",
+              "title": "Contextual Flow Score",
               "type": "integer"
             }
           },
           "required": [
             "reasoning_steps",
-            "overall_accuracy",
-            "joint_smoothness",
-            "contextual_continuity",
-            "grammar_integrity",
-            "word_completeness",
-            "redundancy",
-            "content_loss",
-            "joint_readability"
+            "verbatim_match_score",
+            "sentence_preservation_score",
+            "content_duplication_score",
+            "content_loss_score",
+            "join_transition_score",
+            "contextual_flow_score"
           ],
           "title": "GradingResult",
           "type": "object"
@@ -446,22 +398,22 @@
       },
       "response": {
         "model": "mistral-small:24b-instruct-2501-q4_K_M",
-        "created_at": "2025-02-28T10:07:54.215871Z",
+        "created_at": "2025-03-03T22:32:10.522407Z",
         "message": {
           "role": "assistant",
-          "content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The current chunk, 'This is the final chunk that concludes our transcription.', accurately conveys its purpose as the concluding part of the transcription. It is a clear statement with no apparent errors in spelling or grammar. The phrase 'concludes our transcription' indicates that this is indeed the last piece of content from the audio source, which aligns well with the context provided by the prompt to transcribe an audio. However, there's minimal actual content here, and it lacks any specific details or information that would be derived directly from the audio. The previous chunk ends abruptly without any indication of continuation into this one. There is no mention of what has been transcribed previously in this final chunk.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition from the previous chunk to this final chunk lacks any logical progression or contextual connection. The previous chunk ends with 'This is the middle chunk that continues from the first one.', which suggests ongoing content but does not provide a clear lead-in to the concluding statement in the current chunk. There is no indication of how these chunks are related, and there is an abrupt shift in tone and information flow between these two sentences. The final chunk's statement feels disconnected as it doesn't build on or conclude any specific points made in previous chunks.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the previous chunk\",\n      \"observation\": \"The contextual continuity is severely lacking. There is no overlap or reference to the content from the previous chunk, which makes it difficult for a reader to understand how these chunks relate to each other. The final chunk does not provide any resolution or conclusion to the topics discussed in the previous chunks. It simply states that this is the end without providing any summary or wrap-up of the information presented earlier.\"\n    },\n      {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammar integrity between these two chunks is poor. The previous chunk ends with a period, indicating a complete sentence and a clear ending point, which should naturally lead to a new thought or conclusion in the next chunk. However, the final chunk starts abruptly without any grammatical connection to what came before. It does not pick up on the subject matter from the previous chunks, nor does it use transitional phrases that would help smooth out the transition.\"\n      },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness at chunk boundaries\",\n      \"observation\": \"The word completeness is perfect as there are no words cut off or incomplete. Both chunks end and begin with complete sentences and words. There's no disruption in the flow of language, but this aspect alone does not compensate for the lack of continuity and contextual connection.\"\n    }\n  ],\n  \"overall_accuracy\": 5,\n  \"joint_smoothness\": 3,\n  \"contextual_continuity\": 2,\n  \"grammar_integrity\": 4,\n  \"word_completeness\": 10,\n  \"redundancy\": 6,\n  \"content_loss\": 7,\n  \"joint_readability\": 4\n}"
+          "content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the start padding of this chunk with the end padding of the previous chunk. Quote both texts.\"\n      ,\"observation\": \"Previous end: 'This is the middle chunk that continues from the first one.' Current start: 'This is the final chunk that concludes our transcription.'\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Check if sentences from the previous chunk continue correctly in this chunk. Quote the sentence parts and verify.\",\n      \"observation\": \"The previous chunk ends with a complete sentence, so there are no split sentences to check for continuity.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Look for unnecessary duplication at the join. Quote any repeated text and assess if it\u2019s excessive.\",\n      \"observation\": \"There is no duplication of content outside the overlap region.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Identify any content loss at the join. Quote text around the join to highlight missing elements.\",\n      \"observation\": \"No content appears to be lost; both chunks end and start with distinct sentences.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Read across the join aloud. Quote the transition text and evaluate smoothness.\",\n      \"observation\": \"Reading from 'This is the middle chunk that continues from the first one.' to 'This is the final chunk that concludes our transcription.' feels smooth, but there's a clear break between the two sentences.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Assess contextual continuity across the join. Explain how the context flows or is disrupted.\",\n      \"observation\": \"The transition from one sentence to another indicates that the context flows naturally, with the final chunk clearly concluding the transcription process.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 10,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 9\n}\n    \t"
         },
         "done_reason": "stop",
         "done": true,
-        "total_duration": 38327357000,
-        "load_duration": 10897250,
-        "prompt_eval_count": 1458,
-        "prompt_eval_duration": 6592000000,
-        "eval_count": 711,
-        "eval_duration": 31716000000
+        "total_duration": 28606371459,
+        "load_duration": 9578417,
+        "prompt_eval_count": 1569,
+        "prompt_eval_duration": 7167000000,
+        "eval_count": 473,
+        "eval_duration": 21418000000
       },
-      "original_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The current chunk, 'This is the final chunk that concludes our transcription.', accurately conveys its purpose as the concluding part of the transcription. It is a clear statement with no apparent errors in spelling or grammar. The phrase 'concludes our transcription' indicates that this is indeed the last piece of content from the audio source, which aligns well with the context provided by the prompt to transcribe an audio. However, there's minimal actual content here, and it lacks any specific details or information that would be derived directly from the audio. The previous chunk ends abruptly without any indication of continuation into this one. There is no mention of what has been transcribed previously in this final chunk.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition from the previous chunk to this final chunk lacks any logical progression or contextual connection. The previous chunk ends with 'This is the middle chunk that continues from the first one.', which suggests ongoing content but does not provide a clear lead-in to the concluding statement in the current chunk. There is no indication of how these chunks are related, and there is an abrupt shift in tone and information flow between these two sentences. The final chunk's statement feels disconnected as it doesn't build on or conclude any specific points made in previous chunks.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the previous chunk\",\n      \"observation\": \"The contextual continuity is severely lacking. There is no overlap or reference to the content from the previous chunk, which makes it difficult for a reader to understand how these chunks relate to each other. The final chunk does not provide any resolution or conclusion to the topics discussed in the previous chunks. It simply states that this is the end without providing any summary or wrap-up of the information presented earlier.\"\n    },\n      {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammar integrity between these two chunks is poor. The previous chunk ends with a period, indicating a complete sentence and a clear ending point, which should naturally lead to a new thought or conclusion in the next chunk. However, the final chunk starts abruptly without any grammatical connection to what came before. It does not pick up on the subject matter from the previous chunks, nor does it use transitional phrases that would help smooth out the transition.\"\n      },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness at chunk boundaries\",\n      \"observation\": \"The word completeness is perfect as there are no words cut off or incomplete. Both chunks end and begin with complete sentences and words. There's no disruption in the flow of language, but this aspect alone does not compensate for the lack of continuity and contextual connection.\"\n    }\n  ],\n  \"overall_accuracy\": 5,\n  \"joint_smoothness\": 3,\n  \"contextual_continuity\": 2,\n  \"grammar_integrity\": 4,\n  \"word_completeness\": 10,\n  \"redundancy\": 6,\n  \"content_loss\": 7,\n  \"joint_readability\": 4\n}"
+      "original_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the start padding of this chunk with the end padding of the previous chunk. Quote both texts.\"\n      ,\"observation\": \"Previous end: 'This is the middle chunk that continues from the first one.' Current start: 'This is the final chunk that concludes our transcription.'\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Check if sentences from the previous chunk continue correctly in this chunk. Quote the sentence parts and verify.\",\n      \"observation\": \"The previous chunk ends with a complete sentence, so there are no split sentences to check for continuity.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Look for unnecessary duplication at the join. Quote any repeated text and assess if it\u2019s excessive.\",\n      \"observation\": \"There is no duplication of content outside the overlap region.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Identify any content loss at the join. Quote text around the join to highlight missing elements.\",\n      \"observation\": \"No content appears to be lost; both chunks end and start with distinct sentences.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Read across the join aloud. Quote the transition text and evaluate smoothness.\",\n      \"observation\": \"Reading from 'This is the middle chunk that continues from the first one.' to 'This is the final chunk that concludes our transcription.' feels smooth, but there's a clear break between the two sentences.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Assess contextual continuity across the join. Explain how the context flows or is disrupted.\",\n      \"observation\": \"The transition from one sentence to another indicates that the context flows naturally, with the final chunk clearly concluding the transcription process.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 10,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 9\n}\n    \t"
     },
-    "original_model_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Analysis of overall accuracy and content quality\",\n      \"observation\": \"The current chunk, 'This is the final chunk that concludes our transcription.', accurately conveys its purpose as the concluding part of the transcription. It is a clear statement with no apparent errors in spelling or grammar. The phrase 'concludes our transcription' indicates that this is indeed the last piece of content from the audio source, which aligns well with the context provided by the prompt to transcribe an audio. However, there's minimal actual content here, and it lacks any specific details or information that would be derived directly from the audio. The previous chunk ends abruptly without any indication of continuation into this one. There is no mention of what has been transcribed previously in this final chunk.\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Analysis of smoothness and flow between sentences\",\n      \"observation\": \"The transition from the previous chunk to this final chunk lacks any logical progression or contextual connection. The previous chunk ends with 'This is the middle chunk that continues from the first one.', which suggests ongoing content but does not provide a clear lead-in to the concluding statement in the current chunk. There is no indication of how these chunks are related, and there is an abrupt shift in tone and information flow between these two sentences. The final chunk's statement feels disconnected as it doesn't build on or conclude any specific points made in previous chunks.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Analysis of continuity between this chunk and the previous chunk\",\n      \"observation\": \"The contextual continuity is severely lacking. There is no overlap or reference to the content from the previous chunk, which makes it difficult for a reader to understand how these chunks relate to each other. The final chunk does not provide any resolution or conclusion to the topics discussed in the previous chunks. It simply states that this is the end without providing any summary or wrap-up of the information presented earlier.\"\n    },\n      {\n      \"step_number\": 4,\n      \"description\": \"Analysis of grammar integrity across chunk boundaries\",\n      \"observation\": \"The grammar integrity between these two chunks is poor. The previous chunk ends with a period, indicating a complete sentence and a clear ending point, which should naturally lead to a new thought or conclusion in the next chunk. However, the final chunk starts abruptly without any grammatical connection to what came before. It does not pick up on the subject matter from the previous chunks, nor does it use transitional phrases that would help smooth out the transition.\"\n      },\n    {\n      \"step_number\": 5,\n      \"description\": \"Analysis of word completeness at chunk boundaries\",\n      \"observation\": \"The word completeness is perfect as there are no words cut off or incomplete. Both chunks end and begin with complete sentences and words. There's no disruption in the flow of language, but this aspect alone does not compensate for the lack of continuity and contextual connection.\"\n    }\n  ],\n  \"overall_accuracy\": 5,\n  \"joint_smoothness\": 3,\n  \"contextual_continuity\": 2,\n  \"grammar_integrity\": 4,\n  \"word_completeness\": 10,\n  \"redundancy\": 6,\n  \"content_loss\": 7,\n  \"joint_readability\": 4\n}"
+    "original_model_content": "{\n  \"reasoning_steps\": [\n    {\n      \"step_number\": 1,\n      \"description\": \"Compare the start padding of this chunk with the end padding of the previous chunk. Quote both texts.\"\n      ,\"observation\": \"Previous end: 'This is the middle chunk that continues from the first one.' Current start: 'This is the final chunk that concludes our transcription.'\"\n    },\n    {\n      \"step_number\": 2,\n      \"description\": \"Check if sentences from the previous chunk continue correctly in this chunk. Quote the sentence parts and verify.\",\n      \"observation\": \"The previous chunk ends with a complete sentence, so there are no split sentences to check for continuity.\"\n    },\n    {\n      \"step_number\": 3,\n      \"description\": \"Look for unnecessary duplication at the join. Quote any repeated text and assess if it\u2019s excessive.\",\n      \"observation\": \"There is no duplication of content outside the overlap region.\"\n    },\n    {\n      \"step_number\": 4,\n      \"description\": \"Identify any content loss at the join. Quote text around the join to highlight missing elements.\",\n      \"observation\": \"No content appears to be lost; both chunks end and start with distinct sentences.\"\n    },\n    {\n      \"step_number\": 5,\n      \"description\": \"Read across the join aloud. Quote the transition text and evaluate smoothness.\",\n      \"observation\": \"Reading from 'This is the middle chunk that continues from the first one.' to 'This is the final chunk that concludes our transcription.' feels smooth, but there's a clear break between the two sentences.\"\n    },\n    {\n      \"step_number\": 6,\n      \"description\": \"Assess contextual continuity across the join. Explain how the context flows or is disrupted.\",\n      \"observation\": \"The transition from one sentence to another indicates that the context flows naturally, with the final chunk clearly concluding the transcription process.\"\n    }\n  ],\n  \"verbatim_match_score\": 0,\n  \"sentence_preservation_score\": 10,\n  \"content_duplication_score\": 10,\n  \"content_loss_score\": 10,\n  \"join_transition_score\": 8,\n  \"contextual_flow_score\": 9\n}\n    \t"
   }
 ]
