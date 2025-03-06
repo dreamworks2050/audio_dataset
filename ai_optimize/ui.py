@@ -1644,7 +1644,7 @@ def create_ai_optimize_tab():
                             with open(progress_path, 'a', encoding='utf-8') as f:
                                 f.write(f"    ❌ SKIPPED: {error_msg}\n")
                                 f.write(f"    ℹ️ INFO: This could be due to the file being deleted or never properly created.\n")
-                                f.write(f"    🔍 EXPLANATION: Check if the optimization process completed correctly for this combination.\n")
+                                f.write(f"    🔍 EXPLANATION: This is the last chunk in this combination which can be skipped safely.\n")
                             continue
                         
                         # Load audio
@@ -1653,70 +1653,247 @@ def create_ai_optimize_tab():
                             
                             # Check if audio is valid (not empty or too short)
                             if len(audio) < 100:  # Less than 100ms is probably invalid
-                                skip_reason = "audio_too_short"
-                                skip_reason_desc = "Audio file too short"
-                                error_msg = f"{skip_reason_desc}: {file_path} ({len(audio)}ms)"
-                                logger.warning(error_msg)
-                                skipped_chunks += 1
-                                combo_skipped += 1
+                                # Check if this is the last chunk
+                                is_last_chunk = file_info["chunk_number"] == len(sorted_files)
                                 
-                                # Track skip reason with additional details
-                                if skip_reason not in skip_reasons:
-                                    skip_reasons[skip_reason] = {
-                                        "description": skip_reason_desc,
-                                        "count": 0,
-                                        "chunks": []
-                                    }
-                                skip_reasons[skip_reason]["count"] += 1
-                                skip_reasons[skip_reason]["chunks"].append({
-                                    "chunk_number": file_info["chunk_number"],
-                                    "filename": filename,
-                                    "duration_ms": len(audio),
-                                    "base_start_time": file_info.get("base_start_time", "N/A"),
-                                    "base_end_time": file_info.get("base_end_time", "N/A"),
-                                    "combination": f"chunk{chunk_length}s_overlap{overlap_length}s"
-                                })
-                                
-                                with open(progress_path, 'a', encoding='utf-8') as f:
-                                    f.write(f"    ❌ SKIPPED: {error_msg}\n")
-                                    f.write(f"    ℹ️ INFO: This is likely an empty or corrupted audio file.\n")
-                                    if file_info["chunk_number"] == len(sorted_files) - 1:
+                                # For last chunk, allow skipping
+                                if is_last_chunk:
+                                    skip_reason = "audio_too_short"
+                                    skip_reason_desc = "Audio file too short"
+                                    error_msg = f"{skip_reason_desc}: {file_path} ({len(audio)}ms)"
+                                    logger.warning(error_msg)
+                                    skipped_chunks += 1
+                                    combo_skipped += 1
+                                    
+                                    # Track skip reason with additional details
+                                    if skip_reason not in skip_reasons:
+                                        skip_reasons[skip_reason] = {
+                                            "description": skip_reason_desc,
+                                            "count": 0,
+                                            "chunks": []
+                                        }
+                                    skip_reasons[skip_reason]["count"] += 1
+                                    skip_reasons[skip_reason]["chunks"].append({
+                                        "chunk_number": file_info["chunk_number"],
+                                        "filename": filename,
+                                        "duration_ms": len(audio),
+                                        "base_start_time": file_info.get("base_start_time", "N/A"),
+                                        "base_end_time": file_info.get("base_end_time", "N/A"),
+                                        "combination": f"chunk{chunk_length}s_overlap{overlap_length}s"
+                                    })
+                                    
+                                    with open(progress_path, 'a', encoding='utf-8') as f:
+                                        f.write(f"    ❌ SKIPPED: {error_msg}\n")
+                                        f.write(f"    ℹ️ INFO: This is likely an empty or corrupted audio file.\n")
                                         f.write(f"    🔍 EXPLANATION: This is the last chunk in this combination (chunk #{file_info['chunk_number']}), which is often very short or empty when the audio doesn't divide evenly into {chunk_length}s chunks.\n")
-                                    else:
-                                        f.write(f"    🔍 EXPLANATION: The audio at this position may be silent or corrupted. Check the original audio file at around {file_info.get('base_start_time', 'N/A')}s.\n")
-                                continue
+                                    continue
+                                
+                                # For middle chunks, try to retry transcription up to 3 times
+                                else:
+                                    max_retries = 3
+                                    retry_count = 0
+                                    
+                                    with open(progress_path, 'a', encoding='utf-8') as f:
+                                        f.write(f"    ⚠️ WARNING: Audio file too short ({len(audio)}ms) for middle chunk #{file_info['chunk_number']}\n")
+                                        f.write(f"    🔄 Starting retry process (max {max_retries} attempts)...\n")
+                                    
+                                    while retry_count < max_retries:
+                                        retry_count += 1
+                                        
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"      🔄 Retry attempt {retry_count}/{max_retries} for chunk {filename}...\n")
+                                        
+                                        logger.warning(f"Retry {retry_count}/{max_retries} for chunk {filename} due to short audio")
+                                        
+                                        # Reload the audio file - maybe it was a temporary issue
+                                        try:
+                                            audio = AudioSegment.from_file(file_path)
+                                            if len(audio) >= 100:
+                                                # Success! The audio is now valid
+                                                with open(progress_path, 'a', encoding='utf-8') as f:
+                                                    f.write(f"      ✅ Retry {retry_count} successful! Audio is now valid ({len(audio)}ms).\n")
+                                                break
+                                        except Exception as e:
+                                            logger.error(f"Error reloading audio during retry {retry_count}: {str(e)}")
+                                            with open(progress_path, 'a', encoding='utf-8') as f:
+                                                f.write(f"      ❌ Error during retry {retry_count}: {str(e)}\n")
+                                        
+                                        # Wait before next retry - increasing delay
+                                        retry_delay = retry_count * 2
+                                        logger.info(f"Waiting {retry_delay} seconds before next retry...")
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"      ⏱️ Waiting {retry_delay} seconds before next retry...\n")
+                                        time.sleep(retry_delay)
+                                    
+                                    # If still too short after retries, fail the entire process
+                                    if len(audio) < 100:
+                                        # Instead of failing the entire process, use a placeholder and continue
+                                        logger.warning(f"Middle chunk #{file_info['chunk_number']} ({filename}) is too short ({len(audio)}ms) after {max_retries} retries. Using placeholder and continuing.")
+                                        
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"\n{'='*80}\n")
+                                            f.write(f"⚠️ WARNING: Middle chunk #{file_info['chunk_number']} ({filename}) is too short ({len(audio)}ms) after {max_retries} retries.\n")
+                                            f.write(f"Using placeholder '...' for this chunk and continuing with the next chunk.\n")
+                                            f.write(f"{'='*80}\n\n")
+                                        
+                                        # Add failed chunk info
+                                        skip_reason = "middle_chunk_too_short"
+                                        skip_reason_desc = "Middle chunk too short - using placeholder"
+                                        
+                                        if skip_reason not in skip_reasons:
+                                            skip_reasons[skip_reason] = {
+                                                "description": skip_reason_desc,
+                                                "count": 0,
+                                                "chunks": []
+                                            }
+                                        skip_reasons[skip_reason]["count"] += 1
+                                        skip_reasons[skip_reason]["chunks"].append({
+                                            "chunk_number": file_info["chunk_number"],
+                                            "filename": filename,
+                                            "duration_ms": len(audio),
+                                            "base_start_time": file_info.get("base_start_time", "N/A"),
+                                            "base_end_time": file_info.get("base_end_time", "N/A"),
+                                            "combination": f"chunk{chunk_length}s_overlap{overlap_length}s"
+                                        })
+                                        
+                                        # Create a placeholder transcription
+                                        transcription = "..."
+                                        
+                                        # Create a transcription result with the placeholder
+                                        transcription_result = {
+                                            "chunk_number": file_info["chunk_number"],
+                                            "filename": filename,
+                                            "text": transcription,
+                                            "start_time": file_info["base_start_time"],
+                                            "end_time": file_info["base_end_time"],
+                                            "has_padding_before": file_info["has_padding_before"],
+                                            "has_padding_after": file_info["has_padding_after"],
+                                            "prompt_used": False,
+                                            "prompt_text": None,
+                                            "error": "Audio too short after multiple retries"
+                                        }
+                                        
+                                        # Add to results
+                                        all_transcriptions.append(transcription_result)
+                                        
+                                        # Mark as failed but continue processing
+                                        failed_chunks += 1
+                                        processed_files += 1
+                                        
+                                        # Continue to next chunk
+                                        continue
                             
                             # Prepare prompt if enabled and not the first chunk
                             initial_prompt = None
                             if using_prompts and previous_transcription and file_info['chunk_number'] > 0:
-                                # Get the last N characters, but make sure not to cut words
-                                if len(previous_transcription) <= prompt_chars:
-                                    initial_prompt = previous_transcription
-                                else:
-                                    # Start from the last prompt_chars characters
-                                    prompt_text = previous_transcription[-prompt_chars:]
-                                    # Find the first space to avoid cutting words
-                                    first_space = prompt_text.find(' ')
-                                    if first_space > 0:
-                                        # If there's a space, start from there
-                                        initial_prompt = prompt_text[first_space+1:]
+                                try:
+                                    # Get the last N characters, but make sure not to cut words
+                                    if len(previous_transcription) <= prompt_chars:
+                                        initial_prompt = previous_transcription
                                     else:
-                                        # If no space, just use the whole segment
-                                        initial_prompt = prompt_text
+                                        # Start from the last prompt_chars characters
+                                        prompt_text = previous_transcription[-prompt_chars:]
+                                        # Find the first space to avoid cutting words
+                                        first_space = prompt_text.find(' ')
+                                        if first_space > 0:
+                                            # If there's a space, start from there
+                                            initial_prompt = prompt_text[first_space+1:]
+                                        else:
+                                            # If no space, just use the whole segment
+                                            initial_prompt = prompt_text
+                                    
+                                    # Validate that the prompt can be encoded properly
+                                    if initial_prompt:
+                                        # Check if the prompt can be encoded as UTF-8
+                                        prompt_bytes = initial_prompt.encode('utf-8')
+                                        # If we get here, encoding succeeded
+                                        logger.info(f"Using prompt for chunk {file_info['chunk_number']}: '{initial_prompt[:50]}...' ({len(initial_prompt)} chars, {len(prompt_bytes)} bytes)")
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"    Using prompt: [{len(initial_prompt)} chars, {len(prompt_bytes)} bytes] {initial_prompt[:50]}...\n")
                                 
-                                if initial_prompt:
-                                    logger.info(f"Using prompt for chunk {file_info['chunk_number']}: '{initial_prompt[:50]}...' ({len(initial_prompt)} chars)")
+                                except UnicodeEncodeError as e:
+                                    # Handle encoding error - log and skip using prompt
+                                    logger.warning(f"Unicode encoding error in prompt: {str(e)}")
+                                    logger.warning("Skipping prompt due to encoding issues")
                                     with open(progress_path, 'a', encoding='utf-8') as f:
-                                        f.write(f"    Using prompt: [{len(initial_prompt)} chars] {initial_prompt[:50]}...\n")
+                                        f.write(f"    ⚠️ WARNING: Skipping prompt due to Unicode encoding issues\n")
+                                    initial_prompt = None
                             
                             # Transcribe with error handling
                             try:
-                                transcription = transcription_service.transcribe_chunk(audio, lang_code=language_code, initial_prompt=initial_prompt)
+                                # Initialize retry variables
+                                max_transcription_retries = 3
+                                transcription_retry_count = 0
+                                transcription_success = False
+                                last_transcription_error = None
                                 
-                                # Update last activity time since we successfully processed this chunk
-                                last_activity_time = time.time()
+                                # Start transcription with retry loop
+                                while transcription_retry_count < max_transcription_retries and not transcription_success:
+                                    try:
+                                        # Increment retry counter on subsequent tries
+                                        if transcription_retry_count > 0:
+                                            logger.warning(f"Retry {transcription_retry_count}/{max_transcription_retries} for transcribing chunk {processed_files+1}/{total_files}")
+                                            with open(progress_path, 'a', encoding='utf-8') as f:
+                                                f.write(f"    🔄 RETRY {transcription_retry_count}/{max_transcription_retries}: Attempting transcription again\n")
+                                        
+                                        # Attempt transcription
+                                        transcription = transcription_service.transcribe_chunk(audio, lang_code=language_code, initial_prompt=initial_prompt)
+                                        
+                                        # Update last activity time since we attempted transcription
+                                        last_activity_time = time.time()
+                                        
+                                        # Check if transcription was successful
+                                        if transcription:
+                                            transcription_success = True
+                                            break
+                                        else:
+                                            # Transcription failed but didn't raise an exception
+                                            error_msg = f"Failed to transcribe (no result returned)"
+                                            last_transcription_error = error_msg
+                                            logger.warning(f"Transcription attempt {transcription_retry_count+1} failed: {error_msg}")
+                                            
+                                            # If not the last retry, log the retry attempt
+                                            if transcription_retry_count < max_transcription_retries - 1:
+                                                with open(progress_path, 'a', encoding='utf-8') as f:
+                                                    f.write(f"    ⚠️ Attempt {transcription_retry_count+1} failed: {error_msg}\n")
+                                    
+                                    except Exception as e:
+                                        # Exception during transcription
+                                        error_msg = f"Error during transcription: {str(e)}"
+                                        last_transcription_error = e  # Store the actual exception
+                                        logger.error(f"Transcription attempt {transcription_retry_count+1} error: {error_msg}")
+                                        
+                                        # Check if this is a UTF-8 encoding error
+                                        is_encoding_error = "utf-8" in str(e).lower() and "decode" in str(e).lower()
+                                        
+                                        # If this is an encoding error and we're using a prompt, try without prompt
+                                        if is_encoding_error and initial_prompt and transcription_retry_count == 0:
+                                            logger.warning("Detected UTF-8 encoding error with prompt. Will try without prompt on next attempt.")
+                                            with open(progress_path, 'a', encoding='utf-8') as f:
+                                                f.write(f"    ⚠️ Encoding error with prompt detected. Will try without prompt on next attempt.\n")
+                                            # Remove the prompt for next attempt
+                                            initial_prompt = None
+                                        
+                                        # If not the last retry, log the retry attempt
+                                        if transcription_retry_count < max_transcription_retries - 1:
+                                            with open(progress_path, 'a', encoding='utf-8') as f:
+                                                f.write(f"    ⚠️ Attempt {transcription_retry_count+1} error: {error_msg}\n")
+                                    
+                                    # Increment retry counter
+                                    transcription_retry_count += 1
+                                    
+                                    # If we're going to retry, wait before next attempt
+                                    if transcription_retry_count < max_transcription_retries and not transcription_success:
+                                        retry_delay = transcription_retry_count * 2
+                                        logger.info(f"Waiting {retry_delay} seconds before next retry...")
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"    ⏱️ Waiting {retry_delay} seconds before next retry...\n")
+                                        time.sleep(retry_delay)
                                 
-                                if transcription:
+                                # After retry loop, handle final outcome
+                                if transcription_success:
+                                    # Transcription was successful (either first try or after retries)
+                                    
                                     # Save current transcription for next chunk's prompt
                                     previous_transcription = transcription
                                     
@@ -1744,7 +1921,8 @@ def create_ai_optimize_tab():
                                         'text': transcription,
                                         'prompt_used': bool(initial_prompt),
                                         'prompt_text': initial_prompt if initial_prompt else None,
-                                        'prompt_length': len(initial_prompt) if initial_prompt else 0
+                                        'prompt_length': len(initial_prompt) if initial_prompt else 0,
+                                        'retry_count': transcription_retry_count
                                     })
                                     
                                     # Add to results
@@ -1759,38 +1937,139 @@ def create_ai_optimize_tab():
                                         'transcription': transcription,
                                         'prompt_used': bool(initial_prompt),
                                         'prompt_text': initial_prompt if initial_prompt else None,
-                                        'elapsed_time': chunk_elapsed_time
+                                        'elapsed_time': chunk_elapsed_time,
+                                        'retry_count': transcription_retry_count
                                     })
                                     
                                     # Log success
                                     prompt_info = f" (with prompt)" if initial_prompt else ""
-                                    success_msg = f"    ✅ SUCCESS{prompt_info}: Transcribed in {chunk_elapsed_time:.2f}s"
-                                    logger.info(f"Successfully transcribed chunk {processed_files}/{total_files} in {chunk_elapsed_time:.2f}s{prompt_info}")
+                                    retry_info = f" after {transcription_retry_count} retries" if transcription_retry_count > 0 else ""
+                                    success_msg = f"    ✅ SUCCESS{prompt_info}{retry_info}: Transcribed in {chunk_elapsed_time:.2f}s"
+                                    logger.info(f"Successfully transcribed chunk {processed_files}/{total_files} in {chunk_elapsed_time:.2f}s{prompt_info}{retry_info}")
                                     with open(progress_path, 'a', encoding='utf-8') as f:
                                         f.write(f"{success_msg}\n")
                                     
                                     successful_chunks += 1
                                     combo_successful += 1
                                 else:
-                                    # Transcription failed but didn't raise an exception
-                                    error_msg = f"Failed to transcribe (no result returned)"
-                                    logger.warning(f"Transcription failed for chunk {processed_files}/{total_files}: {error_msg}")
-                                    with open(progress_path, 'a', encoding='utf-8') as f:
-                                        f.write(f"    ❌ FAILED: {error_msg} after {time.time() - chunk_start_time:.2f}s\n")
-                                    failed_chunks += 1
-                                    combo_failed += 1
+                                    # All retries failed
+                                    is_last_chunk = processed_files == total_files - 1
+                                    error_msg = f"Failed to transcribe after {max_transcription_retries} retries: {last_transcription_error}"
+                                    
+                                    # Check if it's specifically a UTF-8 encoding error
+                                    is_utf8_error = "utf-8" in str(last_transcription_error).lower() and "decode" in str(last_transcription_error).lower()
+                                    
+                                    # Add more detailed logging for encoding errors
+                                    if is_utf8_error:
+                                        logger.warning("Detected UTF-8 encoding error in transcription output")
+                                        logger.warning(f"Full error details: {str(last_transcription_error)}")
+                                        with open(progress_path, "a", encoding="utf-8") as f:
+                                            f.write(f"    ⚠️ UTF-8 ENCODING ERROR DETAILS: {str(last_transcription_error)}\n")
+                                            if not initial_prompt:
+                                                f.write(f"    ℹ️ NOTE: No prompt was used for the final attempt\n")
+                                            else:
+                                                f.write(f"    ℹ️ NOTE: A prompt was used and may be part of the encoding issue\n")
+                                    if is_last_chunk:
+                                        # This is the last chunk, we can skip it
+                                        logger.warning(f"Skipping last chunk {processed_files+1}/{total_files} after failed transcription retries")
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"    ❌ SKIPPED: Last chunk failed after {max_transcription_retries} transcription retries\n")
+                                            f.write(f"    ℹ️ INFO: Last chunk can be safely skipped\n")
+                                        
+                                        # Add to skip reasons
+                                        skip_reason = "last_chunk_transcription_failed"
+                                        skip_reason_desc = "Last chunk transcription failed after retries"
+                                        if skip_reason not in skip_reasons:
+                                            skip_reasons[skip_reason] = {
+                                                "description": skip_reason_desc,
+                                                "count": 0,
+                                                "chunks": []
+                                            }
+                                        skip_reasons[skip_reason]["count"] += 1
+                                        skip_reasons[skip_reason]["chunks"].append({
+                                            "chunk_number": file_info["chunk_number"],
+                                            "filename": filename,
+                                            "combination": f"chunk{chunk_length}s_overlap{overlap_length}s",
+                                            "error": str(last_transcription_error)
+                                        })
+                                        
+                                        skipped_chunks += 1
+                                        combo_skipped += 1
+                                    else:
+                                        # This is a middle chunk, use placeholder
+                                        error_type_msg = "UTF-8 encoding error" if is_utf8_error else "transcription failure"
+                                        logger.warning(f"Using placeholder for middle chunk {processed_files+1}/{total_files} after {error_type_msg}")
+                                        with open(progress_path, 'a', encoding='utf-8') as f:
+                                            f.write(f"    ⚠️ FAILED AFTER RETRIES: Using placeholder '...' for chunk {processed_files+1}/{total_files}\n")
+                                            f.write(f"    ℹ️ ERROR DETAILS: {last_transcription_error}\n")
+                                        
+                                        # Create placeholder transcription
+                                        transcription = "..."
+                                        
+                                        # Save placeholder to file
+                                        txt_filename = os.path.splitext(filename)[0] + ".txt"
+                                        txt_path = os.path.join(combo_transcription_dir, txt_filename)
+                                        with open(txt_path, 'w', encoding='utf-8') as f:
+                                            f.write(transcription)
+                                        
+                                        # Add to concatenated transcriptions with placeholder
+                                        all_transcriptions.append({
+                                            'chunk_number': file_info['chunk_number'],
+                                            'start_time': file_info['base_start_time'],
+                                            'end_time': file_info['base_end_time'],
+                                            'text': transcription,
+                                            'prompt_used': bool(initial_prompt),
+                                            'prompt_text': initial_prompt if initial_prompt else None,
+                                            'error': f"Transcription failed after retries - using placeholder ({error_type_msg})"
+                                        })
+                                        
+                                        # Add to results
+                                        combo_results.append({
+                                            'chunk_number': file_info['chunk_number'],
+                                            'filename': filename,
+                                            'txt_filename': txt_filename,
+                                            'base_start_time': file_info['base_start_time'],
+                                            'base_end_time': file_info['base_end_time'],
+                                            'actual_start_time': file_info['actual_start_time'],
+                                            'actual_end_time': file_info['actual_end_time'],
+                                            'transcription': transcription,
+                                            'prompt_used': bool(initial_prompt),
+                                            'prompt_text': initial_prompt if initial_prompt else None,
+                                            'error': f"Transcription failed after retries - using placeholder ({error_type_msg})"
+                                        })
+                                        
+                                        # Add to skip reasons with specific reason code for UTF-8 errors
+                                        skip_reason = "utf8_decoding_error_with_placeholder" if is_utf8_error else "transcription_failed_with_placeholder"
+                                        skip_reason_desc = "UTF-8 decoding error - using placeholder" if is_utf8_error else "Transcription failed after retries - using placeholder"
+                                        
+                                        if skip_reason not in skip_reasons:
+                                            skip_reasons[skip_reason] = {
+                                                "description": skip_reason_desc,
+                                                "count": 0,
+                                                "chunks": []
+                                            }
+                                        skip_reasons[skip_reason]["count"] += 1
+                                        skip_reasons[skip_reason]["chunks"].append({
+                                            "chunk_number": file_info["chunk_number"],
+                                            "filename": filename,
+                                            "combination": f"chunk{chunk_length}s_overlap{overlap_length}s",
+                                            "error": str(last_transcription_error)
+                                        })
+                                        
+                                        failed_chunks += 1
+                                        combo_failed += 1
                             except Exception as e:
-                                # Exception during transcription
-                                error_msg = f"Error during transcription: {str(e)}"
-                                logger.error(error_msg, exc_info=True)
+                                # Exception during audio loading
+                                error_msg = f"Failed to process audio file {filename}: {str(e)}"
+                                logger.error(error_msg)  # Removed exc_info=True
                                 with open(progress_path, 'a', encoding='utf-8') as f:
-                                    f.write(f"    ❌ ERROR: {error_msg} after {time.time() - chunk_start_time:.2f}s\n")
+                                    f.write(f"    ❌ ERROR: {error_msg}\n")
                                 failed_chunks += 1
                                 combo_failed += 1
                         except Exception as e:
                             # Exception during audio loading
                             error_msg = f"Failed to process audio file {filename}: {str(e)}"
-                            logger.error(error_msg, exc_info=True)
+                            logger.error(error_msg)  # Removed exc_info=True
                             with open(progress_path, 'a', encoding='utf-8') as f:
                                 f.write(f"    ❌ ERROR: {error_msg}\n")
                             failed_chunks += 1
@@ -1799,11 +2078,19 @@ def create_ai_optimize_tab():
                     # Calculate elapsed time for this combination
                     combo_elapsed_time = time.time() - combo_start_time
                     
+                    # Check if any placeholders were used
+                    placeholders_used = any(tr.get('text') == '...' for tr in all_transcriptions if 'text' in tr)
+                    
                     # Log combination completion
                     combo_summary = f"Combination completed in {combo_elapsed_time:.2f}s: {combo_successful} successful, {combo_failed} failed, {combo_skipped} skipped"
+                    if placeholders_used:
+                        combo_summary += " (with placeholders for failed chunks)"
+                    
                     logger.info(combo_summary)
                     with open(progress_path, 'a', encoding='utf-8') as f:
                         f.write(f"\nCombination summary: {combo_summary}\n")
+                        if placeholders_used:
+                            f.write(f"  ℹ️ NOTE: Placeholder '...' text was used for some failed chunks\n")
                     
                     # Save concatenated transcription for this combination
                     if all_transcriptions:
@@ -1812,6 +2099,20 @@ def create_ai_optimize_tab():
                         
                         # Sort by chunk number to ensure correct order
                         all_transcriptions.sort(key=lambda x: x['chunk_number'])
+                        
+                        # Check if the last chunk was skipped based on file information
+                        last_chunk_skipped = False
+                        current_chunk_numbers = [item['chunk_number'] for item in all_transcriptions]
+                        expected_chunks = sorted_files
+                        
+                        # Check if the last chunk was skipped
+                        if len(expected_chunks) > 0 and len(all_transcriptions) > 0:
+                            last_chunk_number = len(expected_chunks)
+                            if last_chunk_number not in current_chunk_numbers:
+                                last_chunk_skipped = True
+                                logger.info(f"Detected skipped last chunk #{last_chunk_number} for combination chunk{chunk_length}s_overlap{overlap_length}s")
+                                with open(progress_path, 'a', encoding='utf-8') as f:
+                                    f.write(f"  ℹ️ Last chunk (#{last_chunk_number}) was skipped and will be excluded from AI processing\n")
                         
                         # Save as plain text file
                         with open(concatenated_file_path, 'w', encoding='utf-8') as f:
@@ -1837,7 +2138,20 @@ def create_ai_optimize_tab():
                         
                         # Save as JSON for more structured data
                         with open(concatenated_json_path, 'w', encoding='utf-8') as f:
-                            json.dump(all_transcriptions, f, indent=2)
+                            # Add a metadata field to indicate that the last chunk was skipped
+                            if last_chunk_skipped:
+                                json_data = {
+                                    "metadata": {
+                                        "last_chunk_skipped": True,
+                                        "original_chunk_count": len(expected_chunks),
+                                        "actual_chunk_count": len(all_transcriptions),
+                                        "exclude_from_ai_processing": True
+                                    },
+                                    "transcriptions": all_transcriptions
+                                }
+                                json.dump(json_data, f, indent=2, ensure_ascii=False)
+                            else:
+                                json.dump(all_transcriptions, f, indent=2, ensure_ascii=False)
                         
                         # Add combination results
                         results.append({
@@ -1922,8 +2236,56 @@ def create_ai_optimize_tab():
                         f.write("===== SKIPPED CHUNKS DETAILED REPORT =====\n\n")
                         f.write(f"Total skipped chunks: {skipped_chunks} out of {total_chunks} ({skipped_chunks/total_chunks*100:.1f}%)\n\n")
                         
+                        # Check for placeholder chunks
+                        placeholder_chunks = []
+                        encoding_error_chunks = []
+                        if 'transcription_failed_with_placeholder' in transcription_metadata['skip_reasons']:
+                            placeholder_data = transcription_metadata['skip_reasons']['transcription_failed_with_placeholder']
+                            placeholder_chunks = placeholder_data.get('chunks', [])
+                            
+                        # Check for UTF-8 encoding error chunks specifically
+                        if 'utf8_decoding_error_with_placeholder' in transcription_metadata['skip_reasons']:
+                            encoding_data = transcription_metadata['skip_reasons']['utf8_decoding_error_with_placeholder']
+                            encoding_error_chunks = encoding_data.get('chunks', [])
+                            
+                        # Add information about placeholders
+                        if placeholder_chunks or encoding_error_chunks:
+                            total_placeholders = len(placeholder_chunks) + len(encoding_error_chunks)
+                            f.write(f"\n==== PLACEHOLDER INFORMATION ====\n\n")
+                            f.write(f"Total placeholder chunks: {total_placeholders}\n")
+                            f.write("These are chunks where transcription failed after multiple retries,\n")
+                            f.write("and a placeholder '...' was used instead of the actual transcription.\n\n")
+                            
+                            # Mention encoding errors if any
+                            if encoding_error_chunks:
+                                f.write(f"⚠️ {len(encoding_error_chunks)} placeholders were specifically due to UTF-8 encoding errors.\n")
+                                f.write("This suggests there may be non-standard characters or binary data in the audio transcriptions.\n\n")
+                            
+                            # Group by combination
+                            combo_placeholders = {}
+                            for chunk in placeholder_chunks + encoding_error_chunks:
+                                combo = chunk.get('combination', 'unknown')
+                                if combo not in combo_placeholders:
+                                    combo_placeholders[combo] = []
+                                combo_placeholders[combo].append(chunk)
+                            
+                            # List affected combinations
+                            f.write("Affected combinations:\n")
+                            for combo, chunks in combo_placeholders.items():
+                                f.write(f"• {combo}: {len(chunks)} placeholder(s) used\n")
+                                for chunk in chunks:
+                                    error_info = ""
+                                    if "error" in chunk:
+                                        short_error = str(chunk["error"])
+                                        if len(short_error) > 80:  # Truncate long error messages
+                                            short_error = short_error[:77] + "..."
+                                        error_info = f" - Error: {short_error}"
+                                        
+                                    f.write(f"  - Chunk #{chunk.get('chunk_number', 'unknown')}: {chunk.get('filename', 'unknown')}{error_info}\n")
+                            f.write("\n")
+                        
                         # Group by reason
-                        f.write("=== SKIPPED CHUNKS BY REASON ===\n")
+                        f.write("\n\n=== SKIPPED CHUNKS BY REASON ===\n")
                         for reason_key, reason_data in transcription_metadata['skip_reasons'].items():
                             f.write(f"\n• {reason_data['description']} - {reason_data['count']} chunks\n")
                             
@@ -2014,7 +2376,7 @@ def create_ai_optimize_tab():
                 logger.info(f"Transcription complete. Processed {total_chunks} chunks with {successful_chunks} successful ({successful_chunks/total_chunks*100:.1f}% success rate)")
                 
             except Exception as e:
-                logger.error(f"Critical error during transcription process: {str(e)}", exc_info=True)
+                logger.error(f"Critical error during transcription process: {str(e)}")
                 # Write error to progress file
                 with open(progress_path, 'a', encoding='utf-8') as f:
                     f.write(f"\n❌ CRITICAL ERROR: {str(e)}\n")
@@ -2061,6 +2423,29 @@ def create_ai_optimize_tab():
                 summary += f"  ❌ Failed to transcribe: {failed} ({failed/total_chunks*100:.1f}%)\n"
                 summary += f"  ⚠️ Skipped chunks: {skipped} ({skipped/total_chunks*100:.1f}%)\n"
                 
+                # Add information about placeholders used for failed chunks
+                placeholder_count = 0
+                combinations_with_placeholders = set()
+                
+                # Count placeholders across all combinations
+                for combo in metadata['combinations']:
+                    has_placeholders = False
+                    for file_info in combo.get('files', []):
+                        if isinstance(file_info, dict) and file_info.get('transcription') == '...':
+                            placeholder_count += 1
+                            has_placeholders = True
+                        
+                        if has_placeholders:
+                            combo_pattern = f"chunk{combo['chunk_length']}s_overlap{combo['overlap_length']}s"
+                            combinations_with_placeholders.add(combo_pattern)
+                
+                # If placeholders were used, add a section about it
+                if placeholder_count > 0:
+                    summary += f"\n==== PLACEHOLDER INFORMATION ====\n"
+                    summary += f"Placeholders ('...') were used for {placeholder_count} middle chunks that failed transcription\n"
+                    summary += f"This affects {len(combinations_with_placeholders)} combinations: {', '.join(sorted(combinations_with_placeholders))}\n"
+                    summary += f"These placeholders will affect AI grading - scores may be lower for combinations with placeholders\n"
+                
                 # Add more detailed information about skipped chunks in a prominent section
                 if skipped > 0:
                     # Always add a header for skipped chunks section
@@ -2069,8 +2454,46 @@ def create_ai_optimize_tab():
                     if 'skip_reasons' in metadata:
                         skip_reasons = metadata['skip_reasons']
                         
+                        # Check for placeholder chunks
+                        placeholder_chunks = []
+                        if 'transcription_failed_with_placeholder' in skip_reasons:
+                            placeholder_data = skip_reasons['transcription_failed_with_placeholder']
+                            placeholder_chunks = placeholder_data.get('chunks', [])
+                        
+                        # Check for UTF-8 encoding error chunks specifically
+                        encoding_error_chunks = []
+                        if 'utf8_decoding_error_with_placeholder' in skip_reasons:
+                            encoding_data = skip_reasons['utf8_decoding_error_with_placeholder']
+                            encoding_error_chunks = encoding_data.get('chunks', [])
+                            
+                        # Add information about placeholders
+                        if placeholder_chunks or encoding_error_chunks:
+                            total_placeholders = len(placeholder_chunks) + len(encoding_error_chunks)
+                            summary += f"\n==== PLACEHOLDER INFORMATION ====\n"
+                            summary += f"Placeholders ('...') were used for {total_placeholders} chunks that failed transcription\n"
+                            
+                            # Mention encoding errors specifically if any
+                            if encoding_error_chunks:
+                                summary += f"⚠️ {len(encoding_error_chunks)} placeholders were due to UTF-8 encoding errors\n"
+                                summary += f"This may indicate unusual characters in the transcription output\n"
+                            
+                            summary += f"These placeholders will affect AI grading - scores may be lower for combinations with placeholders\n"
+                            
+                            # Group by combination
+                            combo_placeholders = {}
+                            for chunk in placeholder_chunks + encoding_error_chunks:
+                                combo = chunk.get('combination', 'unknown')
+                                if combo not in combo_placeholders:
+                                    combo_placeholders[combo] = []
+                                combo_placeholders[combo].append(chunk)
+                            
+                            # List affected combinations
+                            summary += f"Affected combinations:\n"
+                            for combo, chunks in combo_placeholders.items():
+                                summary += f"• {combo}: {len(chunks)} placeholder(s) used\n"
+                        
                         # Add breakdown by reason
-                        summary += f"Skipped chunks by reason:\n"
+                        summary += f"\nSkipped chunks by reason:\n"
                         for reason, data in skip_reasons.items():
                             percentage = data['count']/skipped*100
                             summary += f"• {data['description']}: {data['count']} chunks ({percentage:.1f}%)\n"
@@ -2849,7 +3272,7 @@ def create_ai_optimize_tab():
                                         return
                             
                             except Exception as e:
-                                logger.error(f"Unexpected error processing chunk {chunk_number}: {str(e)}", exc_info=True)
+                                logger.error(f"Unexpected error processing chunk {chunk_number}: {str(e)}")
                                 with open(combo_log_path, 'a', encoding='utf-8') as f:
                                     f.write(f"❌ CRITICAL ERROR: {str(e)}\n\n")
                                 failed_chunks += 1
@@ -2967,7 +3390,7 @@ def create_ai_optimize_tab():
                             failed_combinations += 1
                     
                     except Exception as e:
-                        logger.error(f"Error processing combination {combination}: {str(e)}", exc_info=True)
+                        logger.error(f"Error processing combination {combination}: {str(e)}")
                         with open(progress_path, 'a', encoding='utf-8') as f:
                             f.write(f"  ❌ ERROR processing {combination}: {str(e)}\n\n")
                         failed_combinations += 1

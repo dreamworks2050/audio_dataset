@@ -106,3 +106,4 @@ logs/audio_dataset.log
 # Ignore all files in the logs folder
 logs/*
 
+logs/audio_dataset.log

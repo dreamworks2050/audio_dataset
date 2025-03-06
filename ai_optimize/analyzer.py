@@ -118,7 +118,7 @@ def robust_json_parse(text: str) -> Union[Dict[str, Any], None]:
                                 return json.loads(quoted_keys)
                             except json.JSONDecodeError as e:
                                 logger.debug(f"JSON parsing after quoting keys failed: {str(e)}")
-                                logger.error("All JSON parsing attempts failed. Returning None.")
+                                logger.error(f"All JSON parsing attempts failed. Returning None.")
                                 return None
                     
                     # If we couldn't extract a JSON object
@@ -832,6 +832,15 @@ class TranscriptionAnalyzer:
             # Use overlap_seconds from the transcription data if available, otherwise use the provided value
             chunk_overlap_seconds = transcription_data.get("overlap_seconds", overlap_seconds)
             
+            # Skip processing if this is an empty transcription (ensures empty or very short chunks are skipped)
+            if not transcription or len(transcription.strip()) < 10:
+                logger.warning(f"Skipping chunk {chunk_number} ({i+1}/{len(sorted_transcriptions)}) due to empty or very short transcription")
+                with open(analysis_log_path, 'a', encoding='utf-8') as f:
+                    f.write(f"⚠️ SKIPPED chunk {chunk_number} ({i+1}/{len(sorted_transcriptions)}): {filename}\n")
+                    f.write(f"  Reason: Empty or very short transcription ({len(transcription.strip()) if transcription else 0} chars)\n")
+                skipped_files += 1
+                continue
+            
             # Log the start of processing for this chunk
             logger.info(f"Processing chunk {chunk_number} ({i+1}/{len(sorted_transcriptions)}): {filename}")
             with open(analysis_log_path, 'a', encoding='utf-8') as f:
@@ -894,8 +903,54 @@ class TranscriptionAnalyzer:
                             logger.warning(f"Retry {retry_count}/{max_retries} for chunk {chunk_number} after error: {str(e)}. Waiting {wait_time}s...")
                             await asyncio.sleep(wait_time)
                         else:
-                            # Max retries exceeded, re-raise the exception to be caught below
-                            raise
+                            # Max retries exceeded
+                            # If this is the last chunk, we can skip it
+                            # Otherwise, we need to fail differently based on position
+                            if i == len(sorted_transcriptions) - 1:
+                                # This is the last chunk, we can skip it
+                                logger.warning(f"Failed to analyze last chunk {chunk_number} after {max_retries} retries. Skipping.")
+                                with open(analysis_log_path, 'a', encoding='utf-8') as f:
+                                    f.write(f"⚠️ SKIPPED last chunk {chunk_number} after {max_retries} failed retries: {str(last_error)}\n")
+                                skipped_files += 1
+                                # Don't re-raise the exception, just continue to the next iteration (which won't happen)
+                                continue
+                            else:
+                                # This is a middle chunk - handle specially
+                                # Replace transcription with placeholder if retries are exhausted but don't fail the whole process
+                                logger.error(f"Failed to analyze middle chunk {chunk_number} after {max_retries} retries. Using placeholder.")
+                                with open(analysis_log_path, 'a', encoding='utf-8') as f:
+                                    f.write(f"❌ ERROR: Failed to analyze middle chunk {chunk_number} after {max_retries} retries. Using placeholder.\n")
+                                    f.write(f"  Last error: {str(last_error)}\n")
+                                
+                                # Create a minimal placeholder result
+                                analysis_result = GradingResult(
+                                    reasoning_steps=[
+                                        AnalysisStep(
+                                            step_number=1, 
+                                            description="Failed Analysis", 
+                                            observation=f"Failed to analyze after {max_retries} retries: {str(last_error)}")
+                                    ],
+                                    verbatim_match_score=0,
+                                    sentence_preservation_score=0,
+                                    content_duplication_score=0,
+                                    content_loss_score=0,
+                                    join_transition_score=0,
+                                    contextual_flow_score=0
+                                )
+                                
+                                raw_response = {
+                                    "query": "Failed analysis",
+                                    "original_content": "...",
+                                    "response": "Failed to analyze chunk after multiple retries."
+                                }
+                                
+                                # Mark as failed but continue processing
+                                failed_files += 1
+                                break
+                
+                # Skip the rest of the loop if we failed in a way that skips this chunk
+                if retry_count >= max_retries and i == len(sorted_transcriptions) - 1:
+                    continue
                 
                 analysis_duration = time.time() - analysis_start_time
                 
@@ -1004,7 +1059,7 @@ class TranscriptionAnalyzer:
                 
             except Exception as e:
                 error_msg = f"Error analyzing chunk {chunk_number}: {str(e)}"
-                logger.error(error_msg, exc_info=True)
+                logger.error(error_msg)
                 failed_files += 1
                 
                 # Log error to the detailed log
@@ -1078,9 +1133,6 @@ class TranscriptionAnalyzer:
                 f.write(f"Skipped files: {skipped_files}\n")
                 if successful_files > 0:
                     f.write(f"Overall average score: {param_summary['overall_average_score']}/10\n")
-                    f.write("\nAverage scores by category:\n")
-                    for metric, value in param_summary['detailed_metrics'].items():
-                        f.write(f"- {metric.replace('_', ' ').title()}: {value}/10\n")
                 
             logger.info(f"Analysis batch completed for parameter set {params_name}. Processed {total_files} files with {successful_files} successful analyses")
             
@@ -1182,8 +1234,21 @@ class TranscriptionAnalyzer:
                     # Load the transcriptions
                     with open(combined_file, "r") as f:
                         combined_data = json.load(f)
+                    
+                    # Check if the combined data has the new metadata structure
+                    if isinstance(combined_data, dict) and "metadata" in combined_data and "transcriptions" in combined_data:
+                        # Extract metadata
+                        metadata = combined_data.get("metadata", {})
+                        transcriptions = combined_data.get("transcriptions", [])
                         
-                    transcriptions = combined_data.get("transcriptions", [])
+                        # Log if the last chunk was skipped
+                        if metadata.get("last_chunk_skipped", False):
+                            with open(os.path.join(output_dir, "analysis_progress.txt"), "a") as f:
+                                f.write(f"  ℹ️ Last chunk was skipped in this combination (original: {metadata.get('original_chunk_count', 'N/A')}, actual: {metadata.get('actual_chunk_count', 'N/A')})\n")
+                                f.write(f"  ℹ️ Adjusting batch size for AI analysis from {metadata.get('original_chunk_count', 'N/A')} to {metadata.get('actual_chunk_count', 'N/A')} chunks\n")
+                    else:
+                        # Old format without metadata
+                        transcriptions = combined_data if isinstance(combined_data, list) else []
                     
                     if not transcriptions:
                         with open(os.path.join(output_dir, "analysis_progress.txt"), "a") as f:
@@ -1249,7 +1314,6 @@ class TranscriptionAnalyzer:
             f.write(f"Successful file analyses: {successful_files}\n")
             f.write(f"Failed file analyses: {failed_files}\n")
             f.write(f"Success rate: {success_rate:.1f}%\n\n")
-            f.write("To view detailed results, check the 'analysis' folder in each combination directory.\n")
             
         # Create a summary JSON
         summary = {

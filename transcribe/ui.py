@@ -893,7 +893,7 @@ def transcribe_audio_chunks(state, language, use_prompt=True, prompt_type="Previ
             logger.info(f"Completed processing chunk {chunk_number}/{total_chunks}")
             
         except Exception as e:
-            logger.error(f"Error transcribing chunk {chunk_number}: {str(e)}", exc_info=True)
+            logger.error(f"Error transcribing chunk {chunk_number}: {str(e)}")
     
     # Write summary at the end of the file
     with open(combined_output_file, 'a', encoding='utf-8') as f:
@@ -946,5 +946,5 @@ def clear_transcriptions():
         return f"Successfully cleared {file_count} transcription files."
         
     except Exception as e:
-        logger.error(f"Error clearing transcriptions: {str(e)}", exc_info=True)
+        logger.error(f"Error clearing transcriptions: {str(e)}")
         return f"Error clearing transcriptions: {str(e)}"
